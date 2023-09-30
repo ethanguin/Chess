@@ -1,8 +1,8 @@
 # Chess
 Chess project for CS240 at BYU
 
-### TODO
-- [ ] Create implementations of each Interface
+### TODO: Chess Phase 1
+- [x] Create implementations of each Interface
 - [ ] Get tests to run
 - [ ] Create rules to the game (what moves each piece can make at what time)
 - [ ] Create the board (2 dimensional array)
