@@ -11,3 +11,4 @@ Chess project for CS240 at BYU
 - [ ] Implement moves (going from one point in the board to the other)
 - [ ] Create chess types and associate them with the rules
 ```
+- [x] Hello World
