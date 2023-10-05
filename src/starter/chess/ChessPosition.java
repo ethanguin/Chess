@@ -12,10 +12,13 @@ public interface ChessPosition {
 
     /**
      * @return which column this position is in
-     * 1 codes for the left row
+     * 1 codes for the left column
      */
     int getColumn();
 
     //TODO (1,1) coding for bottom left matches a1, matching chess notation better.
     // Should we have it code for top left as that would be more straight forward to iterate over?
+
+    void setPosition(char column, int row);
+    void setPosition(int column, int row);
 }
