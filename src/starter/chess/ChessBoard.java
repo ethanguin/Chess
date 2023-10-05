@@ -7,13 +7,19 @@ public interface ChessBoard {
 
     /**
      * Adds a chess piece to the chessboard
+     *
      * @param position where to add the piece to
-     * @param piece the piece to add
+     * @param piece    the piece to add
      */
     void addPiece(ChessPosition position, ChessPiece piece);
 
+    int getSize();
+    void removePiece(ChessPosition position);
+    void movePiece(ChessPosition oldPos, ChessPosition newPos);
+
     /**
      * Gets a chess piece on the chessboard
+     *
      * @param position The position to get the piece from
      * @return Either the piece at the position, or null if no piece is at that position
      */
