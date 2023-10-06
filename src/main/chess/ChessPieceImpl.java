@@ -24,6 +24,11 @@ public class ChessPieceImpl implements ChessPiece {
     }
 
     @Override
+    public void setPieceType(PieceType type) {
+        this.type = type;
+    }
+
+    @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         if (!isOnBoard(board, myPosition)) {
             return null;

@@ -16,6 +16,7 @@ public interface ChessBoard {
     int getSize();
     void removePiece(ChessPosition position);
     void movePiece(ChessPosition oldPos, ChessPosition newPos);
+    void movePiece(ChessPosition oldPos, ChessPosition newPos, ChessPiece.PieceType promotionPiece);
 
     /**
      * Gets a chess piece on the chessboard

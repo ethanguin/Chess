@@ -29,6 +29,8 @@ public interface ChessPiece {
      */
     PieceType getPieceType();
 
+    void setPieceType(PieceType type);
+
 
 
     /**

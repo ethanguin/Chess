@@ -13,9 +13,13 @@ public class ChessBoardImpl implements ChessBoard {
     public void removePiece(ChessPosition position) {
         board[position.getColumn()][position.getRow()] = null;
     }
+
     @Override
-    public void movePiece(ChessPosition oldPos, ChessPosition newPos) {
+    public void movePiece(ChessPosition oldPos, ChessPosition newPos) {}
+    @Override
+    public void movePiece(ChessPosition oldPos, ChessPosition newPos, ChessPiece.PieceType promotionPiece) {
         ChessPiece piece = getPiece(oldPos);
+        piece.setPieceType(promotionPiece);
         addPiece(newPos, piece);
         removePiece(oldPos);
     }

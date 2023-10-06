@@ -1,7 +1,7 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 public class ChessGameImpl implements ChessGame {
     TeamColor turn;
@@ -22,12 +22,21 @@ public class ChessGameImpl implements ChessGame {
         if (piece == null) {
             return null;
         }
+
+        //check for check on all of the moves
+        Collection<ChessMove> allMoves = null;
         return piece.pieceMoves(board, startPosition);
     }
 
 
     @Override
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        Collection<ChessMove> moves = new HashSet<>(validMoves(move.getStartPosition()));
+        if (moves.contains(move)) {
+            board.movePiece(move.getStartPosition(), move.getEndPosition(), move.getPromotionPiece());
+        } else {
+            throw new InvalidMoveException("Not a valid move");
+        }
     }
 
     @Override
