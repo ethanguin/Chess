@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -10,7 +9,6 @@ import static chess.ChessPiece.PieceType.*;
 public class ChessPieceImpl implements ChessPiece {
     PieceType type;
     ChessGame.TeamColor color;
-    public ChessPieceImpl() {}
     public ChessPieceImpl(PieceType type, ChessGame.TeamColor color) {
         this.type = type;
         this.color = color;
@@ -488,7 +486,6 @@ public class ChessPieceImpl implements ChessPiece {
                 case PAWN -> "P";
                 case ROOK -> "R";
                 case KNIGHT -> "N";
-                default -> "";
             };
         } else {
             return switch (type) {
@@ -498,7 +495,6 @@ public class ChessPieceImpl implements ChessPiece {
                 case PAWN -> "p";
                 case ROOK -> "r";
                 case KNIGHT -> "n";
-                default -> "";
             };
         }
     }
