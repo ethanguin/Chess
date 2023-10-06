@@ -398,7 +398,7 @@ public class ChessPieceImpl implements ChessPiece {
         return moves;
     }
     private Collection<ChessMove> pawnMoves(ChessPosition startPosition, ChessBoard board) {
-        Collection<ChessMove> moves = new ArrayList<>();
+        Collection<ChessMove> moves = new HashSet<>();
         ChessPosition endPosition = new ChessPositionImpl();
         endPosition.setPosition(startPosition.getColumn(), startPosition.getRow());
         int moveDir;
@@ -430,7 +430,7 @@ public class ChessPieceImpl implements ChessPiece {
         endPosition.setPosition(endPosition.getColumn(), endPosition.getRow() + moveDir);
         if (isOnBoard(board, endPosition) && board.getPiece(endPosition) == null) {
             if (endPosition.getRow() == promotionRow) {
-                moves.addAll(getPromotions(startPosition, endPosition));
+                moves.addAll(getPromotions(startPosition, new ChessPositionImpl(endPosition.getColumn(), endPosition.getRow())));
             } else {
                 moves.add(new ChessMoveImpl(startPosition, new ChessPositionImpl(endPosition.getColumn(), endPosition.getRow())));
             }
@@ -442,7 +442,7 @@ public class ChessPieceImpl implements ChessPiece {
         if (isOnBoard(board, endPosition) && board.getPiece(endPosition) != null) {
             if (board.getPiece(endPosition).getTeamColor() != color) {
                 if (endPosition.getRow() == promotionRow) {
-                    moves.addAll(getPromotions(startPosition, endPosition));
+                    moves.addAll(getPromotions(startPosition, new ChessPositionImpl(endPosition.getColumn(), endPosition.getRow())));
                 } else {
                     moves.add(new ChessMoveImpl(startPosition, new ChessPositionImpl(endPosition.getColumn(), endPosition.getRow())));
                 }
@@ -454,7 +454,7 @@ public class ChessPieceImpl implements ChessPiece {
         if (isOnBoard(board, endPosition) && board.getPiece(endPosition) != null) {
             if (board.getPiece(endPosition).getTeamColor() != color) {
                 if (endPosition.getRow() == promotionRow) {
-                    moves.addAll(getPromotions(startPosition, endPosition));
+                    moves.addAll(getPromotions(startPosition, new ChessPositionImpl(endPosition.getColumn(), endPosition.getRow())));
                 } else {
                     moves.add(new ChessMoveImpl(startPosition, new ChessPositionImpl(endPosition.getColumn(), endPosition.getRow())));
                 }
@@ -464,7 +464,7 @@ public class ChessPieceImpl implements ChessPiece {
         return moves;
     }
     private Collection<ChessMove> getPromotions(ChessPosition start, ChessPosition end) {
-        Collection<ChessMove> moves = new ArrayList<>();
+        Collection<ChessMove> moves = new HashSet<>();
         //go through and add a move for each kind of promotion piece
         PieceType[] promotions = {QUEEN, ROOK, KNIGHT, BISHOP};
         for (PieceType piece: promotions) {
