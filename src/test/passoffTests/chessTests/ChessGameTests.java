@@ -441,7 +441,7 @@ public class ChessGameTests {
                 "After move, a piece is still present in the start position");
         ChessPiece whiteEndPiece = game.getBoard().getPiece(whitePromotion.getEndPosition());
         Assertions.assertNotNull(whiteEndPiece, "After move, no piece found at the end position");
-        Assertions.assertEquals(promotionType, whiteEndPiece.getPieceType(),
+         Assertions.assertEquals(promotionType, whiteEndPiece.getPieceType(),
                 "Found piece at end position is not the correct piece type");
         Assertions.assertEquals(ChessGame.TeamColor.WHITE, whiteEndPiece.getTeamColor(),
                 "Found piece at end position is the wrong team color");

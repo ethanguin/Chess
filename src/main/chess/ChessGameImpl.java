@@ -1,6 +1,5 @@
 package chess;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -44,9 +43,21 @@ public class ChessGameImpl implements ChessGame {
 
     @Override
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if (piece ==  null) {
+            throw new InvalidMoveException("No piece on starting position");
+        }
+        if (piece.getTeamColor() != turn) {
+            throw new InvalidMoveException("Move made out of turn");
+        }
         Collection<ChessMove> moves = validMoves(move.getStartPosition());
         if (moves.contains(move)) {
             board.movePiece(move.getStartPosition(), move.getEndPosition(), move.getPromotionPiece());
+            if (piece.getTeamColor() == TeamColor.WHITE) {
+                setTeamTurn(TeamColor.BLACK);
+            } else {
+                setTeamTurn(TeamColor.WHITE);
+            }
         } else {
             throw new InvalidMoveException("Not a valid move");
         }
@@ -54,7 +65,7 @@ public class ChessGameImpl implements ChessGame {
 
     @Override
     public boolean isInCheck(TeamColor teamColor) {
-        Collection<ChessPiece> pieces = new ArrayList<>();
+        //Collection<ChessPiece> pieces = new ArrayList<>();
         //finds the position of the king and checks if it is in the set of the other team's pieceMoves
         ChessPosition kingPos = board.findPiecePosition(new ChessPieceImpl(ChessPiece.PieceType.KING, teamColor));
 
