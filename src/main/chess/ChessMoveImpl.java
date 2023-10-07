@@ -29,7 +29,7 @@ public class ChessMoveImpl implements ChessMove {
 
     @Override
     public ChessPiece.PieceType getPromotionPiece() {
-        return null;
+        return promotionPiece;
     }
     @Override
     public boolean equals(Object o) {
@@ -51,7 +51,7 @@ public class ChessMoveImpl implements ChessMove {
         out.append(endPosition.toString());
         if (promotionPiece != null) {
             out.append(", promotionPiece = ");
-            out.append(promotionPiece.toString());
+            out.append(promotionPiece);
             out.append('}');
         }
         return out.toString();

@@ -21,10 +21,12 @@ public class ChessBoardImpl implements ChessBoard {
     @Override
     public void movePiece(ChessPosition oldPos, ChessPosition newPos, ChessPiece.PieceType promotionPiece) {
         ChessPiece piece = getPiece(oldPos);
-        if (promotionPiece != null) {
-            piece.setPieceType(promotionPiece);
+        if (promotionPiece == null) {
+            addPiece(newPos, piece);
+        } else {
+            addPiece(newPos, new ChessPieceImpl(promotionPiece, piece.getTeamColor()));
         }
-        movePiece(oldPos, newPos);
+        removePiece(oldPos);
     }
 
     @Override
