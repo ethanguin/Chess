@@ -33,6 +33,9 @@ public class ChessPieceImpl implements ChessPiece {
         if (!isOnBoard(board, myPosition)) {
             return null;
         }
+        if (board.getPiece(myPosition).getPieceType() == null) {
+            return null;
+        }
         return switch (type) {
             case KING -> kingMoves(myPosition, board);
             case QUEEN -> queenMoves(myPosition, board);
@@ -40,6 +43,7 @@ public class ChessPieceImpl implements ChessPiece {
             case ROOK -> rookMoves(myPosition, board);
             case KNIGHT -> knightMoves(myPosition, board);
             case PAWN -> pawnMoves(myPosition, board);
+            default -> null;
         };
     }
     private Collection<ChessMove> kingMoves(ChessPosition startPosition, ChessBoard board) {

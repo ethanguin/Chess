@@ -14,7 +14,10 @@ public interface ChessBoard {
     void addPiece(ChessPosition position, ChessPiece piece);
 
     int getSize();
+
+    ChessPosition findPiecePosition(ChessPiece piece);
     void removePiece(ChessPosition position);
+
     void movePiece(ChessPosition oldPos, ChessPosition newPos);
     void movePiece(ChessPosition oldPos, ChessPosition newPos, ChessPiece.PieceType promotionPiece);
 
@@ -31,4 +34,6 @@ public interface ChessBoard {
      * (How the game of chess normally starts)
      */
     void resetBoard();
+
+    ChessBoard copy();
 }

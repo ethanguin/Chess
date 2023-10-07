@@ -13,15 +13,34 @@ public class ChessBoardImpl implements ChessBoard {
     public void removePiece(ChessPosition position) {
         board[position.getColumn()][position.getRow()] = null;
     }
-
-    @Override
-    public void movePiece(ChessPosition oldPos, ChessPosition newPos) {}
+    public void movePiece(ChessPosition oldPos, ChessPosition newPos) {
+        ChessPiece piece = getPiece(oldPos);
+        addPiece(newPos, piece);
+        removePiece(oldPos);
+    }
     @Override
     public void movePiece(ChessPosition oldPos, ChessPosition newPos, ChessPiece.PieceType promotionPiece) {
         ChessPiece piece = getPiece(oldPos);
         piece.setPieceType(promotionPiece);
-        addPiece(newPos, piece);
-        removePiece(oldPos);
+        movePiece(oldPos, newPos);
+    }
+
+    @Override
+    public ChessPosition findPiecePosition(ChessPiece piece) {
+        ChessPosition position = new ChessPositionImpl();
+        for (int i = boardSize - 1; i > 0; i--) {
+            for (int j = 1; j < boardSize; j++) {
+                if (board[j][i] == null) {
+                    continue;
+                }
+                if (board[j][i].equals(piece)) {
+                    position.setPosition(j, i);
+                    break;
+                }
+            }
+        }
+
+        return position;
     }
 
     @Override
@@ -91,5 +110,19 @@ public class ChessBoardImpl implements ChessBoard {
             out.append("\n");
         }
         return out.toString();
+    }
+
+    @Override
+    public ChessBoard copy() {
+        ChessBoard boardCopy = new ChessBoardImpl();
+        for (int i = 1; i < boardSize; i++) {
+            for (int j = 1; j < boardSize; j++) {
+                if (board[i][j] == null) {
+                    continue;
+                }
+                boardCopy.addPiece(new ChessPositionImpl(i, j), new ChessPieceImpl(board[i][j].getPieceType(), board[i][j].getTeamColor()));
+            }
+        }
+        return boardCopy;
     }
 }
