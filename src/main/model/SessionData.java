@@ -1,5 +1,7 @@
 package model;
 
+import java.util.UUID;
+
 /**
  * <code>SessionData</code> class is the object that stores any data related to a specific login session
  */
@@ -14,15 +16,25 @@ public class SessionData {
      */
     private String username;
 
+    public SessionData() {
+    }
+
     public SessionData(String authToken, String username) {
         this.authToken = authToken;
         this.username = username;
     }
 
-    public SessionData() {
+    public SessionData(String username) {
+        this.username = username;
+        this.authToken = generateAuthToken();
     }
 
     public String getAuthToken() {
+        return authToken;
+    }
+
+    private String generateAuthToken() {
+        authToken = UUID.randomUUID().toString();
         return authToken;
     }
 

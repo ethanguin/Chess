@@ -18,7 +18,7 @@ public class StandardAPITests {
     private static final int HTTP_BAD_REQUEST = 400;
     private static final int HTTP_UNAUTHORIZED = 401;
     private static final int HTTP_FORBIDDEN = 403;
-    
+
     private static TestModels.TestUser existingUser;
     private static TestModels.TestUser newUser;
     private static TestModels.TestCreateRequest createRequest;
@@ -47,6 +47,7 @@ public class StandardAPITests {
 
     @BeforeEach
     public void setup() {
+        int three = 3;
         serverFacade.clear();
 
         TestModels.TestRegisterRequest registerRequest = new TestModels.TestRegisterRequest();

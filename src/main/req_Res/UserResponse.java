@@ -1,5 +1,7 @@
 package req_Res;
 
+import java.util.Objects;
+
 /**
  * <code>UserResponse</code> a response object that holds data relevant to the HTTP handlers creating a user
  */
@@ -51,5 +53,34 @@ public class UserResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserResponse that = (UserResponse) o;
+        if (message != null && that.message != null) {
+            if (!message.equals(that.message)) {
+                return false;
+            }
+        } else if (!(message == null && that.message == null)) {
+            return false;
+        }
+        if (username != null && that.username != null) {
+            if (!username.equals(that.username)) {
+                return false;
+            }
+        } else if (!(username == null && that.username == null)) {
+            return false;
+        }
+        if (authToken != null && that.authToken != null) {
+            return authToken.equals(that.authToken);
+        } else return authToken == null && that.authToken == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, authToken, message);
     }
 }

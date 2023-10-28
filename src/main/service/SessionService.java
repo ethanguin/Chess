@@ -1,5 +1,8 @@
 package service;
 
+import dataAccess.DataAccess;
+import dataAccess.DataAccessException;
+import dataAccess.MemoryDataAccess;
 import model.SessionData;
 import model.UserData;
 import req_Res.SessionResponse;
@@ -14,8 +17,27 @@ public class SessionService {
      * @param user - the UserRequest, which includes the username and password of the user
      * @return SessionResponse - returns an authToken and username of the user, or an error when unable to complete the request
      */
-    public SessionResponse createSession(UserData user) {
-        return new SessionResponse();
+    public static SessionResponse createSession(UserData user) {
+        String unauthorizedError = "Error: unauthorized";
+        if (user.getUsername() == null || user.getPassword() == null || user.getUsername().isEmpty() || user.getPassword().isEmpty()) {
+            return new SessionResponse(unauthorizedError);
+        }
+        DataAccess dao = new MemoryDataAccess();
+        UserData foundUser = dao.findUser(user);
+        if (foundUser == null) {
+            return new SessionResponse(unauthorizedError);
+        }
+        if (!foundUser.getPassword().equals(user.getPassword())) {
+            return new SessionResponse(unauthorizedError);
+        }
+
+        try {
+            SessionData session = new SessionData(user.getUsername());
+            dao.createSession(session);
+            return new SessionResponse(user.getUsername(), session.getAuthToken());
+        } catch (DataAccessException e) {
+            return new SessionResponse(e.getMessage());
+        }
     }
 
     /**
@@ -24,7 +46,15 @@ public class SessionService {
      * @param session - includes the session authToken
      * @return SessionResponse - returns an empty response if it is able to complete the request. It includes the error message if unsuccessful
      */
-    public SessionResponse deleteSession(SessionData session) {
-        return new SessionResponse();
+    public static SessionResponse deleteSession(SessionData session) {
+        DataAccess dao = new MemoryDataAccess();
+        try {
+            dao.deleteSession(session);
+            return new SessionResponse();
+        } catch (DataAccessException e) {
+            return new SessionResponse(e.getMessage());
+        }
+
+
     }
 }

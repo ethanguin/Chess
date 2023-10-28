@@ -1,6 +1,7 @@
 package service;
 
 import req_Res.*;
+import dataAccess.*;
 
 /**
  * <code>AdminService</code> service for admin requests
@@ -12,7 +13,13 @@ public class AdminService {
      *
      * @return ClearResponse - returns an empty response if it is successful, includes an error message if it is unable to clear the database
      */
-    public ClearResponse clear() {
-        return new ClearResponse();
+    static public ClearResponse clear() {
+        DataAccess dao = new MemoryDataAccess();
+        try {
+            dao.clear();
+            return new ClearResponse();
+        } catch (DataAccessException e) {
+            return new ClearResponse(e.getMessage());
+        }
     }
 }

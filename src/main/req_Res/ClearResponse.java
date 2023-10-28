@@ -5,7 +5,7 @@ package req_Res;
  */
 public class ClearResponse {
     /**
-     * <code>message</code> the error message that is returned if response is a failure response
+     * the error message that is returned if response is a failure response
      */
     private String message;
 

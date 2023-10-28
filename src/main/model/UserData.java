@@ -23,7 +23,8 @@ public class UserData {
         this.email = email;
     }
 
-    public UserData() {
+    public UserData(String username) {
+        this.username = username;
     }
 
     public String getUsername() {

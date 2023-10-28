@@ -9,7 +9,7 @@ import java.util.Collection;
 /**
  * <code>DataAccess</code> Interface for accessing data in various locations. Possible implementations include: in-memory database, online database, or storage database
  */
-interface DataAccess {
+public interface DataAccess {
     /**
      * <code>clear</code> Method for clearing all data from the DataAccess implementation
      *
@@ -32,7 +32,7 @@ interface DataAccess {
      * @return UserData - returns null if no existing user is found, returns the data if the information is successfully found
      * @throws DataAccessException - throws if no such user is found or if unable to access stored data
      */
-    UserData findUser(UserData user) throws DataAccessException;
+    UserData findUser(UserData user);
 
     /**
      * <code>createSession</code> Method for creating a new login session for a user
@@ -55,9 +55,8 @@ interface DataAccess {
      *
      * @param session - session to find
      * @return SessionData - returns the data if the session is successfully found
-     * @throws DataAccessException - throws if no session exists in stored data or if unable to access stored data
      */
-    SessionData findSession(SessionData session) throws DataAccessException;
+    SessionData findSession(SessionData session);
 
     /**
      * <code>createGame</code> Method for creating a new game and storing it in the DataAccess implementation
