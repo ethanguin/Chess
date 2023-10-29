@@ -62,11 +62,8 @@ public class GameHandlers {
             } else {
                 res.status(500);
             }
+            return gson.toJson(response);
         }
-        if (response.getGameList().isEmpty()) {
-            return new JsonObject();
-        }
-
-        return gson.toJson(response.getGameList().toString());
+        return gson.toJson(response);
     }
 }

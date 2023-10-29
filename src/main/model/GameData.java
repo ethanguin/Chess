@@ -46,6 +46,7 @@ public class GameData {
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
         this.game = game;
+        this.watchers = null;
     }
 
     public GameData() {
@@ -62,10 +63,6 @@ public class GameData {
 
     public int getGameID() {
         return gameID;
-    }
-
-    public void setGameID(int gameID) {
-        this.gameID = gameID;
     }
 
     public String getGameName() {
@@ -90,14 +87,6 @@ public class GameData {
 
     public void setBlackUsername(String blackUsername) {
         this.blackUsername = blackUsername;
-    }
-
-    public ChessGame getGame() {
-        return game;
-    }
-
-    public void setGame(ChessGame game) {
-        this.game = game;
     }
 
     public void addWatcher(String username) {

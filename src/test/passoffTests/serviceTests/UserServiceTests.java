@@ -21,7 +21,7 @@ public class UserServiceTests {
     }
 
     @Test
-    public void unsuccessfulCreateUser() throws DataAccessException {
+    public void unsuccessfulCreateUser() {
         UserResponse response = UserService.createUser(failUser);
         UserResponse expectedResponse = new UserResponse("Error: bad request");
         DataAccess dao = new MemoryDataAccess();

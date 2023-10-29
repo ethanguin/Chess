@@ -66,7 +66,7 @@ public class MemoryDataAccess implements DataAccess {
                 return sessionData;
             }
         }
-        throw new DataAccessException("no session found");
+        throw new DataAccessException("Error: unauthorized");
     }
 
     @Override
@@ -96,7 +96,12 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public Collection<GameData> findAllGames() throws DataAccessException {
-        return new HashSet<>(games);
+        Collection<GameData> gameList = new HashSet<>();
+        for (GameData game : games) {
+            GameData addedGame = new GameData(game.getGameID(), game.getGameName(), game.getWhiteUsername(), game.getBlackUsername(), null);
+            gameList.add(addedGame);
+        }
+        return gameList;
     }
 
     @Override

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import req_Res.GameRequest;
 import req_Res.GameResponse;
 import service.GameService;
-import spark.Session;
 
 public class GameServiceTests {
     UserData testUser = new UserData("ethan", "password123", "me@me.org");
@@ -29,6 +28,7 @@ public class GameServiceTests {
 
         GameResponse response = GameService.createGame(gameRequest);
 
-        Assertions.assertNotNull(response.getGameID());
+        Assertions.assertNotNull(dao.findGame(response.getGameID()));
+        Assertions.assertNotNull(response.getMessage());
     }
 }

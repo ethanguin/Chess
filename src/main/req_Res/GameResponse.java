@@ -21,7 +21,7 @@ public class GameResponse {
     /**
      * the list of games for listGames endpoint
      */
-    private Collection<GameData> gameList;
+    private Collection<GameData> games;
 
     public GameResponse() {
     }
@@ -34,10 +34,6 @@ public class GameResponse {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     public int getGameID() {
         return gameID;
     }
@@ -46,12 +42,8 @@ public class GameResponse {
         this.gameID = gameID;
     }
 
-    public Collection<GameData> getGameList() {
-        return gameList;
-    }
-
     public void setGameList(Collection<GameData> gameList) {
-        this.gameList = gameList;
+        this.games = gameList;
     }
 
     @Override
