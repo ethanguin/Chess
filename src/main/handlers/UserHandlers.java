@@ -6,8 +6,6 @@ import req_Res.UserResponse;
 import service.UserService;
 import spark.*;
 
-import java.io.IOException;
-
 public class UserHandlers {
     static public Object createUser(Request req, Response res) {
         Gson gson = new Gson();

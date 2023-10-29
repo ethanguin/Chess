@@ -15,6 +15,7 @@ public class AdminServiceTests {
     public void successfulClear() throws DataAccessException {
         //add in data into the dao and use clear to clear it
         DataAccess dao = new MemoryDataAccess();
+        dao.clear();
         dao.createUser(testUser);
         Assertions.assertEquals(dao.findUser(testUser), testUser);
 

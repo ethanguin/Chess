@@ -23,8 +23,10 @@ public class SessionService {
             return new SessionResponse(unauthorizedError);
         }
         DataAccess dao = new MemoryDataAccess();
-        UserData foundUser = dao.findUser(user);
-        if (foundUser == null) {
+        UserData foundUser;
+        try {
+            foundUser = dao.findUser(user);
+        } catch (DataAccessException e) {
             return new SessionResponse(unauthorizedError);
         }
         if (!foundUser.getPassword().equals(user.getPassword())) {

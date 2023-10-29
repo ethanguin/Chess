@@ -25,7 +25,6 @@ public class StandardAPITests {
     private static TestServerFacade serverFacade;
     private String existingAuth;
 
-
     @BeforeAll
     public static void init() {
         existingUser = new TestModels.TestUser();

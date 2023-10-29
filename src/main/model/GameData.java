@@ -1,6 +1,9 @@
 package model;
 
 import chess.ChessGame;
+import chess.ChessGameImpl;
+
+import java.util.ArrayList;
 
 /**
  * <code>GameData</code> class is the object that stores any data related to a specific game
@@ -10,7 +13,7 @@ public class GameData {
     /**
      * a unique numerical ID that identifies a game
      */
-    private String gameID;
+    private int gameID;
 
     /**
      * a name given to a game, doesn't have to be unique
@@ -28,11 +31,16 @@ public class GameData {
     private String blackUsername;
 
     /**
+     * the list of usernames of the users watching the game
+     */
+    private ArrayList<String> watchers = new ArrayList<>();
+
+    /**
      * the Chess Game assigned to the game, including pieces, chess board, and positions
      */
-    private ChessGame game;
+    private ChessGame game = new ChessGameImpl();
 
-    public GameData(String gameID, String gameName, String whiteUsername, String blackUsername, ChessGame game) {
+    public GameData(int gameID, String gameName, String whiteUsername, String blackUsername, ChessGame game) {
         this.gameID = gameID;
         this.gameName = gameName;
         this.whiteUsername = whiteUsername;
@@ -43,11 +51,20 @@ public class GameData {
     public GameData() {
     }
 
-    public String getGameID() {
+    public GameData(int gameID) {
+        this.gameID = gameID;
+    }
+
+    public GameData(String gameName) {
+        this.gameName = gameName;
+        this.gameID = RandomNum.newNum();
+    }
+
+    public int getGameID() {
         return gameID;
     }
 
-    public void setGameID(String gameID) {
+    public void setGameID(int gameID) {
         this.gameID = gameID;
     }
 
@@ -81,5 +98,9 @@ public class GameData {
 
     public void setGame(ChessGame game) {
         this.game = game;
+    }
+
+    public void addWatcher(String username) {
+        watchers.add(username);
     }
 }

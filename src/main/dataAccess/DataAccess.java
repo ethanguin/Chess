@@ -32,7 +32,7 @@ public interface DataAccess {
      * @return UserData - returns null if no existing user is found, returns the data if the information is successfully found
      * @throws DataAccessException - throws if no such user is found or if unable to access stored data
      */
-    UserData findUser(UserData user);
+    UserData findUser(UserData user) throws DataAccessException;
 
     /**
      * <code>createSession</code> Method for creating a new login session for a user
@@ -56,7 +56,7 @@ public interface DataAccess {
      * @param session - session to find
      * @return SessionData - returns the data if the session is successfully found
      */
-    SessionData findSession(SessionData session);
+    SessionData findSession(SessionData session) throws DataAccessException;
 
     /**
      * <code>createGame</code> Method for creating a new game and storing it in the DataAccess implementation
@@ -73,7 +73,7 @@ public interface DataAccess {
      * @param chessGame - the new chessGame string
      * @throws DataAccessException - throws if user is unauthorized, if gameID doesn't exist, or if unable to access stored data
      */
-    void updateGame(String gameID, String chessGame) throws DataAccessException;
+    void updateGame(int gameID, String chessGame) throws DataAccessException;
 
     /**
      * <code>findGame</code> Method for finding an existing game
@@ -82,7 +82,7 @@ public interface DataAccess {
      * @return GameData - returns the data if the game is successfully found
      * @throws DataAccessException - throws if no gameID exists or if unable to access stored data
      */
-    GameData findGame(String gameID) throws DataAccessException;
+    GameData findGame(int gameID) throws DataAccessException;
 
     /**
      * <code>deleteGame</code> Method for deleting an existing game from the DataAccess implementation

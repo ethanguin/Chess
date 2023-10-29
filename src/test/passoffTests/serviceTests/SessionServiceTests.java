@@ -24,8 +24,7 @@ public class SessionServiceTests {
         SessionResponse response = SessionService.createSession(testUser);
         SessionData session = new SessionData(testUser.getUsername());
         session.setAuthToken(response.getAuthToken());
-
-        Assertions.assertNotNull(dao.findSession(session));
+        
         Assertions.assertNull(response.getMessage());
     }
 

@@ -21,49 +21,52 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void createUser(UserData user) throws DataAccessException {
-        if (findUser(user) != null) {
-            throw new DataAccessException("Error: already taken");
+        try {
+            findUser(user);
+        } catch (DataAccessException e) {
+            users.add(user);
+            return;
         }
-        users.add(user);
+        throw new DataAccessException("Error: already taken");
     }
 
     @Override
-    public UserData findUser(UserData user) {
+    public UserData findUser(UserData user) throws DataAccessException {
         for (UserData userData : users) {
             if (userData.getUsername().equals(user.getUsername())) {
                 return userData;
             }
         }
-        return null;
+        throw new DataAccessException("user does not exist");
     }
 
     @Override
     public void createSession(SessionData session) throws DataAccessException {
-        if (findUser(new UserData(session.getUsername())) != null) {
-            sessions.add(session.copy());
-        } else {
+        try {
+            findUser(new UserData(session.getUsername()));
+            sessions.add(session);
+        } catch (DataAccessException e) {
             throw new DataAccessException("Error: unauthorized");
         }
     }
 
     @Override
     public void deleteSession(SessionData session) throws DataAccessException {
-        SessionData foundSession = findSession(session);
-        if (foundSession == null) {
+        try {
+            sessions.remove(findSession(session));
+        } catch (DataAccessException e) {
             throw new DataAccessException("Error: unauthorized");
-        } else {
-            sessions.remove(foundSession);
         }
     }
 
     @Override
-    public SessionData findSession(SessionData session) {
+    public SessionData findSession(SessionData session) throws DataAccessException {
         for (SessionData sessionData : sessions) {
             if (sessionData.getAuthToken().equals(session.getAuthToken())) {
                 return sessionData;
             }
         }
-        return null;
+        throw new DataAccessException("no session found");
     }
 
     @Override
@@ -72,23 +75,18 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void updateGame(String gameID, String chessGame) throws DataAccessException {
-        GameData game = findGame(gameID);
-        if (game == null) {
-            throw new DataAccessException("Error: game does not exist");
-        }
-        game.setGameName(chessGame);
-
+    public void updateGame(int gameID, String chessGame) throws DataAccessException {
+        findGame(gameID).setGameName(chessGame);
     }
 
     @Override
-    public GameData findGame(String gameID) {
+    public GameData findGame(int gameID) throws DataAccessException {
         for (GameData gameData : games) {
-            if (gameData.getGameID().equals(gameID)) {
+            if (gameData.getGameID() == gameID) {
                 return gameData;
             }
         }
-        return null;
+        throw new DataAccessException("Error: bad request");
     }
 
     @Override
@@ -98,15 +96,23 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public Collection<GameData> findAllGames() throws DataAccessException {
-        return games;
+        return new HashSet<>(games);
     }
 
     @Override
-    public void claimGameSpot(String username, String playerColor, GameData game) throws DataAccessException {
+    public void claimGameSpot(String username, String playerColor, GameData gameData) throws DataAccessException {
+        var game = findGame(gameData.getGameID());
+        DataAccessException alreadyTaken = new DataAccessException("Error: already taken");
         if (playerColor.equalsIgnoreCase("white")) {
-            findGame(game.getGameID()).setWhiteUsername(username);
+            if (game.getWhiteUsername() != null) {
+                throw alreadyTaken;
+            }
+            game.setWhiteUsername(username);
         } else if (playerColor.equalsIgnoreCase("black")) {
-            findGame(game.getGameID()).setBlackUsername(username);
+            if (game.getBlackUsername() != null) {
+                throw alreadyTaken;
+            }
+            game.setBlackUsername(username);
         } else if (playerColor.equalsIgnoreCase("")) {
             addGameSpectator(username, game);
         } else {
@@ -117,9 +123,7 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void addGameSpectator(String username, GameData game) throws DataAccessException {
-        if (findUser(new UserData(username)) == null) {
-            throw new DataAccessException("Error: unauthorized");
-        }
+        findUser(new UserData(username));
         findGame(game.getGameID()).addWatcher(username);
     }
 }
