@@ -49,4 +49,8 @@ public class SessionData {
     public void setUsername(String username) {
         this.username = username;
     }
+
+    public SessionData copy() {
+        return new SessionData(this.authToken, this.username);
+    }
 }

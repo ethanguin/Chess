@@ -45,8 +45,7 @@ public class SessionHandlers {
             }
             return gson.toJson(response);
         }
-
-        res.status(200);
+        
         return new JsonObject();
     }
 }

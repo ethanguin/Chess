@@ -40,7 +40,7 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public void createSession(SessionData session) throws DataAccessException {
         if (findUser(new UserData(session.getUsername())) != null) {
-            sessions.add(session);
+            sessions.add(session.copy());
         } else {
             throw new DataAccessException("Error: unauthorized");
         }
@@ -48,7 +48,12 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void deleteSession(SessionData session) throws DataAccessException {
-        sessions.remove(findSession(session));
+        SessionData foundSession = findSession(session);
+        if (foundSession == null) {
+            throw new DataAccessException("Error: unauthorized");
+        } else {
+            sessions.remove(foundSession);
+        }
     }
 
     @Override
@@ -77,7 +82,7 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData findGame(String gameID) throws DataAccessException {
+    public GameData findGame(String gameID) {
         for (GameData gameData : games) {
             if (gameData.getGameID().equals(gameID)) {
                 return gameData;

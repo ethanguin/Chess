@@ -12,6 +12,7 @@ import service.SessionService;
 
 public class SessionServiceTests {
     UserData testUser = new UserData("ethan", "password123", "me@me.org");
+    UserData failUser = new UserData("john", "", "me@me.org");
     String authToken = "12345";
 
     @Test
@@ -25,10 +26,22 @@ public class SessionServiceTests {
         session.setAuthToken(response.getAuthToken());
 
         Assertions.assertNotNull(dao.findSession(session));
+        Assertions.assertNull(response.getMessage());
     }
 
     @Test
     public void wrongPasswordCreateSession() throws DataAccessException {
+        DataAccess dao = new MemoryDataAccess();
+        dao.clear();
+        dao.createUser(testUser);
+
+        SessionResponse response = SessionService.createSession(new UserData(testUser.getUsername(), failUser.getPassword(), null));
+
+        Assertions.assertEquals("Error: unauthorized", response.getMessage());
+    }
+
+    @Test
+    public void successfulDeleteSession() throws DataAccessException {
         DataAccess dao = new MemoryDataAccess();
         dao.clear();
         dao.createUser(testUser);
@@ -37,6 +50,20 @@ public class SessionServiceTests {
 
         SessionResponse response = SessionService.deleteSession(session);
 
-        Assertions.assertNull(dao.findSession(session));
+        Assertions.assertNull(response.getMessage());
+    }
+
+    @Test
+    public void wrongAuthDeleteSession() throws DataAccessException {
+        DataAccess dao = new MemoryDataAccess();
+        dao.clear();
+        dao.createUser(testUser);
+        SessionData session = new SessionData(authToken, testUser.getUsername());
+        dao.createSession(session);
+        SessionData wrongSession = new SessionData("fish123", testUser.getUsername());
+
+        SessionResponse response = SessionService.deleteSession(wrongSession);
+
+        Assertions.assertEquals("Error: unauthorized", response.getMessage());
     }
 }

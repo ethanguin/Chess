@@ -47,8 +47,11 @@ public class SessionService {
      * @return SessionResponse - returns an empty response if it is able to complete the request. It includes the error message if unsuccessful
      */
     public static SessionResponse deleteSession(SessionData session) {
-        DataAccess dao = new MemoryDataAccess();
+        if (session.getAuthToken() == null || session.getAuthToken().isEmpty()) {
+            return new SessionResponse("Error: unauthorized");
+        }
         try {
+            DataAccess dao = new MemoryDataAccess();
             dao.deleteSession(session);
             return new SessionResponse();
         } catch (DataAccessException e) {

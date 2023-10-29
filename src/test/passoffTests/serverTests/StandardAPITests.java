@@ -47,7 +47,6 @@ public class StandardAPITests {
 
     @BeforeEach
     public void setup() {
-        int three = 3;
         serverFacade.clear();
 
         TestModels.TestRegisterRequest registerRequest = new TestModels.TestRegisterRequest();
@@ -249,7 +248,7 @@ public class StandardAPITests {
 
     @Test
     @Order(10)
-    @DisplayName("Valid Creation")
+    @DisplayName("Valid Game Creation")
     public void goodCreate() {
         TestModels.TestCreateResult createResult = serverFacade.createGame(createRequest, existingAuth);
 
@@ -265,7 +264,7 @@ public class StandardAPITests {
 
     @Test
     @Order(11)
-    @DisplayName("Create with Bad Authentication")
+    @DisplayName("Create Game with Bad Authentication")
     public void badAuthCreate() {
         //log out user so auth is invalid
         serverFacade.logout(existingAuth);
