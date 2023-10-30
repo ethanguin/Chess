@@ -8,9 +8,9 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class MemoryDataAccess implements DataAccess {
-    private static Collection<UserData> users = new HashSet<>();
-    private static Collection<GameData> games = new HashSet<>();
-    private static Collection<SessionData> sessions = new HashSet<>();
+    private final static Collection<UserData> users = new HashSet<>();
+    private final static Collection<GameData> games = new HashSet<>();
+    private final static Collection<SessionData> sessions = new HashSet<>();
 
     @Override
     public void clear() throws DataAccessException {

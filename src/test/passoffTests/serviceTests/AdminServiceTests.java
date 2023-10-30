@@ -20,6 +20,13 @@ public class AdminServiceTests {
         Assertions.assertEquals(dao.findUser(testUser), testUser);
 
         AdminService.clear();
-        Assertions.assertNull(dao.findUser(testUser));
+        String userMessage;
+        try {
+            UserData user = dao.findUser(testUser);
+            userMessage = "user found!";
+        } catch (DataAccessException e) {
+            userMessage = "user not found!";
+        }
+        Assertions.assertEquals("user not found!", userMessage);
     }
 }
