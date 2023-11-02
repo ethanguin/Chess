@@ -23,8 +23,9 @@ public class UserServiceTests {
     @Test
     public void createUserNoData() {
         UserResponse response = UserService.createUser(failUser);
+        
         UserResponse expectedResponse = new UserResponse("Error: bad request");
-        DataAccess dao = new MemoryDataAccess();
+
         Assertions.assertEquals(expectedResponse.getMessage(), response.getMessage());
     }
 }

@@ -22,7 +22,7 @@ public class AdminServiceTests {
         AdminService.clear();
         String userMessage;
         try {
-            UserData user = dao.findUser(testUser);
+            dao.findUser(testUser);
             userMessage = "user found!";
         } catch (DataAccessException e) {
             userMessage = "user not found!";

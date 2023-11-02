@@ -95,7 +95,7 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public Collection<GameData> findAllGames() throws DataAccessException {
+    public Collection<GameData> findAllGames() {
         Collection<GameData> gameList = new HashSet<>();
         for (GameData game : games) {
             GameData addedGame = new GameData(game.getGameID(), game.getGameName(), game.getWhiteUsername(), game.getBlackUsername(), null);

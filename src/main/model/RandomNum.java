@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Random;
 
 public class RandomNum {
-    private static Collection<Integer> usedNumbers = new HashSet<>();
+    private static final Collection<Integer> usedNumbers = new HashSet<>();
 
     public static int newNum() {
         int num;

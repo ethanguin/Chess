@@ -7,7 +7,7 @@ public class UserData {
     /**
      * the username of the specific user defined by the <code>UserData</code> object
      */
-    private String username;
+    private final String username;
     /**
      * the password of the user
      */

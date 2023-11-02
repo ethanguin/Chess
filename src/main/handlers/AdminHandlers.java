@@ -8,7 +8,7 @@ import spark.Request;
 import spark.Response;
 
 public class AdminHandlers {
-    static public Object clear(Request req, Response res) {
+    static public Object clear(Request ignoredReq, Response res) {
         ClearResponse response = AdminService.clear();
         Gson gson = new Gson();
         var message = response.getMessage();
