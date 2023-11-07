@@ -11,7 +11,8 @@ import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class SQLDataAccessTests {
     UserData testUser = new UserData("ethan", "password", "me@me.org");
@@ -218,7 +219,72 @@ public class SQLDataAccessTests {
         DataAccess dao = new SQLDataAccess();
         dao.clear();
 
-        
+        Collection<GameData> gameList = new ArrayList<>();
+        gameList.add(new GameData("game1"));
+        gameList.add(new GameData("game2"));
+        gameList.add(new GameData("game3"));
+
+        for (GameData game : gameList) {
+            dao.createGame(game);
+        }
+        boolean equals = true;
+        var foundGames = dao.findAllGames();
+        if (foundGames.size() != gameList.size()) {
+            equals = false;
+        }
+        for (GameData game : foundGames) {
+            if (!gameList.contains(game)) {
+                equals = false;
+                break;
+            }
+        }
+        Assertions.assertTrue(equals);
     }
 
+    @Test
+    public void successfulClaimGameSpot() throws DataAccessException {
+        DataAccess dao = new SQLDataAccess();
+        dao.clear();
+
+        dao.createUser(testUser);
+        dao.createGame(testGame);
+        dao.claimGameSpot(testUser.getUsername(), "white", testGame);
+        testGame.setWhiteUsername(testUser.getUsername());
+
+        var foundGame = dao.findGame(testGame.getGameID());
+        Assertions.assertEquals(testGame, foundGame);
+    }
+
+    @Test
+    public void claimGameSpotNonexistentGame() throws DataAccessException {
+        DataAccess dao = new SQLDataAccess();
+        dao.clear();
+
+        dao.createUser(testUser);
+
+        Assertions.assertThrows(DataAccessException.class, () -> dao.claimGameSpot(testUser.getUsername(), "white", testGame));
+    }
+
+    @Test
+    public void successfulAddGameSpectator() throws DataAccessException {
+        DataAccess dao = new SQLDataAccess();
+        dao.clear();
+
+        dao.createUser(testUser);
+        dao.createGame(testGame);
+        dao.addGameSpectator(testUser.getUsername(), testGame);
+        testGame.addWatcher(testUser.getUsername());
+
+        var foundGame = dao.findGame(testGame.getGameID());
+        Assertions.assertEquals(testGame, foundGame);
+    }
+
+    @Test
+    public void addGameSpectatorNonexistentGame() throws DataAccessException {
+        DataAccess dao = new SQLDataAccess();
+        dao.clear();
+
+        dao.createUser(testUser);
+        Assertions.assertThrows(DataAccessException.class, () -> dao.addGameSpectator(testUser.getUsername(), testGame));
+    }
 }

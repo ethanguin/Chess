@@ -3,6 +3,7 @@ package passoffTests.serviceTests;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
+import dataAccess.SQLDataAccess;
 import model.GameData;
 import model.SessionData;
 import model.UserData;
@@ -18,7 +19,7 @@ public class GameServiceTests {
 
     @Test
     public void successfulCreateGame() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
 
         dao.createUser(testUser);
@@ -35,7 +36,7 @@ public class GameServiceTests {
 
     @Test
     public void createGameNoAuth() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
 
         dao.createUser(testUser);
@@ -50,7 +51,7 @@ public class GameServiceTests {
 
     @Test
     public void successfulJoinGame() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
 
         dao.createUser(testUser);
@@ -71,7 +72,7 @@ public class GameServiceTests {
 
     @Test
     public void joinGameNoAuth() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
 
         dao.createUser(testUser);
@@ -89,7 +90,7 @@ public class GameServiceTests {
 
     @Test
     public void successfulListGames() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
 
         dao.createUser(testUser);
@@ -104,7 +105,7 @@ public class GameServiceTests {
 
     @Test
     public void listGamesNoAuth() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
 
         dao.createUser(testUser);

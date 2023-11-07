@@ -3,6 +3,7 @@ package passoffTests.serviceTests;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
+import dataAccess.SQLDataAccess;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -14,19 +15,12 @@ public class AdminServiceTests {
     @Test
     public void successfulClear() throws DataAccessException {
         //add in data into the dao and use clear to clear it
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
         dao.createUser(testUser);
         Assertions.assertEquals(dao.findUser(testUser), testUser);
 
         AdminService.clear();
-        String userMessage;
-        try {
-            dao.findUser(testUser);
-            userMessage = "user found!";
-        } catch (DataAccessException e) {
-            userMessage = "user not found!";
-        }
-        Assertions.assertEquals("user not found!", userMessage);
+        Assertions.assertNull(dao.findUser(testUser));
     }
 }

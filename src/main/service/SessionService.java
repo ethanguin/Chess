@@ -2,7 +2,7 @@ package service;
 
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
-import dataAccess.MemoryDataAccess;
+import dataAccess.SQLDataAccess;
 import model.SessionData;
 import model.UserData;
 import req_Res.SessionResponse;
@@ -22,12 +22,20 @@ public class SessionService {
         if (user.getUsername() == null || user.getPassword() == null || user.getUsername().isEmpty() || user.getPassword().isEmpty()) {
             return new SessionResponse(unauthorizedError);
         }
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao;
+        try {
+            dao = new SQLDataAccess();
+        } catch (DataAccessException e) {
+            return new SessionResponse(e.getMessage());
+        }
         UserData foundUser;
         try {
             foundUser = dao.findUser(user);
+            if (foundUser == null) {
+                return new SessionResponse(unauthorizedError);
+            }
         } catch (DataAccessException e) {
-            return new SessionResponse(unauthorizedError);
+            return new SessionResponse(e.getMessage());
         }
         if (!foundUser.getPassword().equals(user.getPassword())) {
             return new SessionResponse(unauthorizedError);
@@ -53,7 +61,7 @@ public class SessionService {
             return new SessionResponse("Error: unauthorized");
         }
         try {
-            DataAccess dao = new MemoryDataAccess();
+            DataAccess dao = new SQLDataAccess();
             dao.deleteSession(session);
             return new SessionResponse();
         } catch (DataAccessException e) {

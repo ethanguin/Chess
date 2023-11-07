@@ -14,7 +14,12 @@ public class AdminService {
      * @return ClearResponse - returns an empty response if it is successful, includes an error message if it is unable to clear the database
      */
     static public ClearResponse clear() {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao;
+        try {
+            dao = new SQLDataAccess();
+        } catch (DataAccessException e) {
+            return new ClearResponse(e.getMessage());
+        }
         try {
             dao.clear();
             return new ClearResponse();

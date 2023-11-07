@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -103,7 +104,7 @@ public class SQLDataAccess implements DataAccess {
     public void deleteSession(SessionData session) throws DataAccessException {
         var foundSession = findSession(session);
         if (foundSession == null) {
-            throw new DataAccessException("Error: bad request");
+            throw new DataAccessException("Error: unauthorized");
         }
         String sqlInsert = "DELETE FROM sessions WHERE authToken = ?";
         ResultSet resultSet;
@@ -186,8 +187,13 @@ public class SQLDataAccess implements DataAccess {
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                return new GameData(resultSet.getInt("gameID"), resultSet.getString("gameName"), resultSet.getString("whiteUsername"),
+                GameData gameData = new GameData(resultSet.getInt("gameID"), resultSet.getString("gameName"), resultSet.getString("whiteUsername"),
                         resultSet.getString("blackUsername"), deserializeGame(resultSet.getString("game")));
+                Collection<String> watchers = findWatchers(gameID);
+                for (String watcher : watchers) {
+                    gameData.addWatcher(watcher);
+                }
+                return gameData;
             } else {
                 return null;
             }
@@ -220,17 +226,99 @@ public class SQLDataAccess implements DataAccess {
     @Override
     public Collection<GameData> findAllGames() throws DataAccessException {
         Collection<GameData> gameList = new HashSet<>();
-        return null;
+        String sqlInsert = "SELECT * FROM games";
+        ResultSet resultSet;
+        var conn = chessDatabase.getConnection();
+        try (var preparedStatement = conn.prepareStatement(sqlInsert)) {
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                GameData gameData = new GameData(resultSet.getInt("gameID"), resultSet.getString("gameName"), resultSet.getString("whiteUsername"),
+                        resultSet.getString("blackUsername"), deserializeGame(resultSet.getString("game")));
+                Collection<String> watchers = findWatchers(gameData.getGameID());
+                for (String watcher : watchers) {
+                    gameData.addWatcher(watcher);
+                }
+                gameList.add(gameData);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex.toString());
+        } finally {
+            chessDatabase.returnConnection(conn);
+        }
+        return gameList;
     }
 
     @Override
     public void claimGameSpot(String username, String playerColor, GameData game) throws DataAccessException {
+        var foundGame = findGame(game.getGameID());
+        if (foundGame == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+        String sqlUpdate = null;
+        if (playerColor.equalsIgnoreCase("white")) {
+            if (foundGame.getWhiteUsername() != null) {
+                throw new DataAccessException("Error: already taken");
+            }
+            sqlUpdate = "UPDATE games SET whiteUsername = ? WHERE gameID = ?";
+        } else if (playerColor.equalsIgnoreCase("black")) {
+            if (foundGame.getBlackUsername() != null) {
+                throw new DataAccessException("Error: already taken");
+            }
+            sqlUpdate = "UPDATE games SET blackUsername = ? WHERE gameID = ?";
+        } else if (playerColor.isEmpty()) {
+            addGameSpectator(username, game);
+        } else {
+            throw new DataAccessException("Error: bad request");
+        }
 
+        var conn = chessDatabase.getConnection();
+        try (var preparedStatement = conn.prepareStatement(sqlUpdate)) {
+            preparedStatement.setString(1, username);
+            preparedStatement.setInt(2, game.getGameID());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex.toString());
+        } finally {
+            chessDatabase.returnConnection(conn);
+        }
     }
 
     @Override
     public void addGameSpectator(String username, GameData game) throws DataAccessException {
+        if (findGame(game.getGameID()) == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+        String sqlUpdate = "INSERT INTO watchers (username, gameID) VALUES (?, ?)";
 
+        var conn = chessDatabase.getConnection();
+        try (var preparedStatement = conn.prepareStatement(sqlUpdate)) {
+            preparedStatement.setString(1, username);
+            preparedStatement.setInt(2, game.getGameID());
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex.toString());
+        } finally {
+            chessDatabase.returnConnection(conn);
+        }
+    }
+
+    private Collection<String> findWatchers(int gameID) throws DataAccessException {
+        Collection<String> watchers = new ArrayList<>();
+        String sqlInsert = "SELECT * FROM watchers WHERE gameID = ?";
+        ResultSet resultSet;
+        var conn = chessDatabase.getConnection();
+        try (var preparedStatement = conn.prepareStatement(sqlInsert)) {
+            preparedStatement.setInt(1, gameID);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                watchers.add(resultSet.getString("username"));
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex.toString());
+        } finally {
+            chessDatabase.returnConnection(conn);
+        }
+        return watchers;
     }
 
     private ChessGame deserializeGame(String gameString) {

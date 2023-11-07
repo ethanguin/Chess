@@ -2,7 +2,7 @@ package service;
 
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
-import dataAccess.MemoryDataAccess;
+import dataAccess.SQLDataAccess;
 import model.GameData;
 import model.SessionData;
 import req_Res.GameRequest;
@@ -19,7 +19,12 @@ public class GameService {
      * @return GameResponse - returns the gameID of the new game if successful. If unsuccessful, it includes an error message
      */
     public static GameResponse createGame(GameRequest gameRequest) {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao;
+        try {
+            dao = new SQLDataAccess();
+        } catch (DataAccessException e) {
+            return new GameResponse(e.getMessage());
+        }
         if (gameRequest.getGameName() == null || gameRequest.getGameName().isEmpty()) {
             return new GameResponse("Error: bad request");
         }
@@ -27,9 +32,11 @@ public class GameService {
         SessionData session = new SessionData();
         session.setAuthToken(gameRequest.getAuthToken());
         try {
-            dao.findSession(session);
+            if (dao.findSession(session) == null) {
+                return new GameResponse("Error: unauthorized");
+            }
         } catch (DataAccessException e) {
-            return new GameResponse("Error: unauthorized");
+            return new GameResponse(e.getMessage());
         }
 
         try {
@@ -49,11 +56,19 @@ public class GameService {
      * @return GameResponse - returns an empty response if successful. If unsuccessful, it includes an error message
      */
     public static GameResponse joinGame(GameRequest gameRequest) {
-        DataAccess dao = new MemoryDataAccess();
+        String playerColor = gameRequest.getPlayerColor();
+        DataAccess dao;
         try {
-            dao.findGame(gameRequest.getGameID());
+            dao = new SQLDataAccess();
         } catch (DataAccessException e) {
-            return new GameResponse("Error: bad request");
+            return new GameResponse(e.getMessage());
+        }
+        try {
+            if (dao.findGame(gameRequest.getGameID()) == null) {
+                return new GameResponse("Error: bad request");
+            }
+        } catch (DataAccessException e) {
+            return new GameResponse(e.getMessage());
         }
 
         SessionData session = new SessionData();
@@ -61,10 +76,13 @@ public class GameService {
         SessionData foundSession;
         try {
             foundSession = dao.findSession(session);
+            if (foundSession == null) {
+                return new GameResponse("Error: unauthorized");
+            }
         } catch (DataAccessException e) {
-            return new GameResponse("Error: unauthorized");
+            return new GameResponse(e.getMessage());
         }
-        if (gameRequest.getPlayerColor() == null) {
+        if (playerColor == null) {
             try {
                 dao.findGame(gameRequest.getGameID()).addWatcher(foundSession.getUsername());
                 return new GameResponse();
@@ -73,7 +91,7 @@ public class GameService {
             }
         }
         try {
-            dao.claimGameSpot(foundSession.getUsername(), gameRequest.getPlayerColor(), new GameData(gameRequest.getGameID()));
+            dao.claimGameSpot(foundSession.getUsername(), playerColor, new GameData(gameRequest.getGameID()));
         } catch (DataAccessException e) {
             return new GameResponse(e.getMessage());
         }
@@ -87,13 +105,20 @@ public class GameService {
      * @return GameResponse - a response that includes list of all the games or an error message
      */
     public static GameResponse listGames(String authToken) {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao;
+        try {
+            dao = new SQLDataAccess();
+        } catch (DataAccessException e) {
+            return new GameResponse(e.getMessage());
+        }
         SessionData session = new SessionData();
         session.setAuthToken(authToken);
         try {
-            dao.findSession(session);
+            if (dao.findSession(session) == null) {
+                return new GameResponse("Error: unauthorized");
+            }
         } catch (DataAccessException e) {
-            return new GameResponse("Error: unauthorized");
+            return new GameResponse(e.getMessage());
         }
         try {
             GameResponse gameResponse = new GameResponse();

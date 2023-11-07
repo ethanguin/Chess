@@ -3,6 +3,7 @@ package passoffTests.serviceTests;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
+import dataAccess.SQLDataAccess;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,14 +17,14 @@ public class UserServiceTests {
     @Test
     public void successfulCreateUser() throws DataAccessException {
         UserService.createUser(testUser);
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         Assertions.assertEquals(testUser, dao.findUser(testUser));
     }
 
     @Test
     public void createUserNoData() {
         UserResponse response = UserService.createUser(failUser);
-        
+
         UserResponse expectedResponse = new UserResponse("Error: bad request");
 
         Assertions.assertEquals(expectedResponse.getMessage(), response.getMessage());

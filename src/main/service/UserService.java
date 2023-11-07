@@ -2,7 +2,7 @@ package service;
 
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
-import dataAccess.MemoryDataAccess;
+import dataAccess.SQLDataAccess;
 import model.SessionData;
 import model.UserData;
 import req_Res.UserResponse;
@@ -22,7 +22,10 @@ public class UserService {
             return new UserResponse("Error: bad request");
         }
         try {
-            DataAccess dao = new MemoryDataAccess();
+            DataAccess dao = new SQLDataAccess();
+            if (dao.findUser(user) != null) {
+                return new UserResponse("Error: already taken");
+            }
             dao.createUser(user);
             SessionData session = new SessionData(user.getUsername());
             dao.createSession(session);

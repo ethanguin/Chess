@@ -3,6 +3,7 @@ package passoffTests.serviceTests;
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
 import dataAccess.MemoryDataAccess;
+import dataAccess.SQLDataAccess;
 import model.SessionData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
@@ -17,20 +18,20 @@ public class SessionServiceTests {
 
     @Test
     public void successfulCreateSession() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
         dao.createUser(testUser);
 
         SessionResponse response = SessionService.createSession(testUser);
         SessionData session = new SessionData(testUser.getUsername());
         session.setAuthToken(response.getAuthToken());
-        
+
         Assertions.assertNull(response.getMessage());
     }
 
     @Test
     public void wrongPasswordCreateSession() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
         dao.createUser(testUser);
 
@@ -41,7 +42,7 @@ public class SessionServiceTests {
 
     @Test
     public void successfulDeleteSession() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
         dao.createUser(testUser);
         SessionData session = new SessionData(authToken, testUser.getUsername());
@@ -54,7 +55,7 @@ public class SessionServiceTests {
 
     @Test
     public void wrongAuthDeleteSession() throws DataAccessException {
-        DataAccess dao = new MemoryDataAccess();
+        DataAccess dao = new SQLDataAccess();
         dao.clear();
         dao.createUser(testUser);
         SessionData session = new SessionData(authToken, testUser.getUsername());

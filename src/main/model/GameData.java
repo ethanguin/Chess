@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessGameImpl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -34,7 +35,7 @@ public class GameData {
     /**
      * the list of usernames of the users watching the game
      */
-    private ArrayList<String> watchers = new ArrayList<>();
+    private Collection<String> watchers = new ArrayList<>();
 
     /**
      * the Chess Game assigned to the game, including pieces, chess board, and positions
@@ -47,7 +48,6 @@ public class GameData {
         this.whiteUsername = whiteUsername;
         this.blackUsername = blackUsername;
         this.game = game;
-        this.watchers = null;
     }
 
     public GameData() {
@@ -121,7 +121,7 @@ public class GameData {
         } else if (!(blackUsername == null && gameData.blackUsername == null)) {
             return false;
         }
-        return gameID == gameData.gameID && Objects.equals(gameName, gameData.gameName) && Objects.equals(watchers, gameData.watchers) && game.equals(gameData.game);
+        return gameID == gameData.gameID && gameName.equals(gameData.gameName) && watchers.equals(gameData.watchers) && game.equals(gameData.game);
     }
 
     @Override
