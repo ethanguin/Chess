@@ -4,6 +4,7 @@ import chess.ChessGame;
 import chess.ChessGameImpl;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * <code>GameData</code> class is the object that stores any data related to a specific game
@@ -91,5 +92,40 @@ public class GameData {
 
     public void addWatcher(String username) {
         watchers.add(username);
+    }
+
+    public ChessGame getGame() {
+        return game;
+    }
+
+    public void setGame(ChessGame game) {
+        this.game = game;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GameData gameData = (GameData) o;
+        if (whiteUsername != null && gameData.whiteUsername != null) {
+            if (!whiteUsername.equals(gameData.whiteUsername)) {
+                return false;
+            }
+        } else if (!(whiteUsername == null && gameData.whiteUsername == null)) {
+            return false;
+        }
+        if (blackUsername != null && gameData.blackUsername != null) {
+            if (!blackUsername.equals(gameData.blackUsername)) {
+                return false;
+            }
+        } else if (!(blackUsername == null && gameData.blackUsername == null)) {
+            return false;
+        }
+        return gameID == gameData.gameID && Objects.equals(gameName, gameData.gameName) && Objects.equals(watchers, gameData.watchers) && game.equals(gameData.game);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gameID, gameName, whiteUsername, blackUsername, watchers, game);
     }
 }

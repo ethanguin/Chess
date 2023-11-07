@@ -2,10 +2,15 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class ChessGameImpl implements ChessGame {
     TeamColor turn;
     ChessBoard board = new ChessBoardImpl();
+
+    public ChessGameImpl() {
+        setTeamTurn(TeamColor.WHITE);
+    }
 
     @Override
     public TeamColor getTeamTurn() {
@@ -154,5 +159,25 @@ public class ChessGameImpl implements ChessGame {
     @Override
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessGameImpl chessGame = (ChessGameImpl) o;
+        if (turn != null && chessGame.turn != null) {
+            if (!turn.equals(chessGame.turn)) {
+                return false;
+            }
+        } else if (!(turn == null && chessGame.turn == null)) {
+            return false;
+        }
+        return Objects.equals(board, chessGame.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(turn, board);
     }
 }

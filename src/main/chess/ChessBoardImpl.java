@@ -1,23 +1,34 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import static chess.ChessPiece.PieceType.*;
 
 public class ChessBoardImpl implements ChessBoard {
-    int boardSize = 8 + 1;
+    private final int boardSize = 8 + 1;
     ChessPiece[][] board = new ChessPiece[boardSize][boardSize];
+
+    public ChessBoardImpl() {
+        resetBoard();
+    }
+
     @Override
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[position.getColumn()][position.getRow()] = piece;
     }
+
     @Override
     public void removePiece(ChessPosition position) {
         board[position.getColumn()][position.getRow()] = null;
     }
+
     public void movePiece(ChessPosition oldPos, ChessPosition newPos) {
         ChessPiece piece = getPiece(oldPos);
         addPiece(newPos, piece);
         removePiece(oldPos);
     }
+
     @Override
     public void movePiece(ChessPosition oldPos, ChessPosition newPos, ChessPiece.PieceType promotionPiece) {
         ChessPiece piece = getPiece(oldPos);
@@ -128,5 +139,20 @@ public class ChessBoardImpl implements ChessBoard {
             }
         }
         return boardCopy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoardImpl that = (ChessBoardImpl) o;
+        return Arrays.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(boardSize);
+        result = 31 * result + Arrays.deepHashCode(board);
+        return result;
     }
 }

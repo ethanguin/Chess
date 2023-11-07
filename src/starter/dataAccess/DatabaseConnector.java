@@ -23,12 +23,10 @@ import java.util.LinkedList;
  *  }
  * </pre>
  */
-public class Database {
-
-    // FIXME: Change these fields, if necessary, to match your database configuration
+public class DatabaseConnector {
     public static final String DB_NAME = "chess";
     private static final String DB_USERNAME = "root";
-    private static final String DB_PASSWORD = "admin";
+    private static final String DB_PASSWORD = "ethanguin12";
 
     private static final String CONNECTION_URL = "jdbc:mysql://localhost:3306";
 

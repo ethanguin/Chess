@@ -1,0 +1,29 @@
+CREATE DATABASE IF NOT EXISTS chess;
+USE chess;
+CREATE TABLE IF NOT EXISTS users (
+    username VARCHAR(255) NOT NULL PRIMARY KEY,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL
+);
+CREATE TABLE IF NOT EXISTS sessions (
+    authToken VARCHAR(36) NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    FOREIGN KEY (username) REFERENCES users(username),
+    PRIMARY KEY (authToken)
+);
+CREATE TABLE IF NOT EXISTS games (
+    gameID INT NOT NULL PRIMARY KEY,
+    gameName VARCHAR(255) NOT NULL,
+    whiteUsername VARCHAR(255),
+    blackUsername VARCHAR(255),
+    game TEXT,
+    FOREIGN KEY (whiteUsername) REFERENCES users(username),
+    FOREIGN KEY (blackUsername) REFERENCES users(username)
+);
+CREATE TABLE IF NOT EXISTS watchers (
+    watcherID INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    gameID INT NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    FOREIGN KEY (gameID) REFERENCES games(gameID),
+    FOREIGN KEY(username) REFERENCES users(username)
+);

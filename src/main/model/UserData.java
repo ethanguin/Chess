@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Objects;
+
 /**
  * <code>UserData</code> class is the object that stores any data related to a specific login session
  */
@@ -37,5 +39,18 @@ public class UserData {
 
     public String getEmail() {
         return email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserData userData = (UserData) o;
+        return Objects.equals(username, userData.username) && Objects.equals(password, userData.password) && Objects.equals(email, userData.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password, email);
     }
 }
