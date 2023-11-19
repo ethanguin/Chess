@@ -19,12 +19,8 @@ public class GameService {
      * @return GameResponse - returns the gameID of the new game if successful. If unsuccessful, it includes an error message
      */
     public static GameResponse createGame(GameRequest gameRequest) {
-        DataAccess dao;
-        try {
-            dao = new SQLDataAccess();
-        } catch (DataAccessException e) {
-            return new GameResponse(e.getMessage());
-        }
+        DataAccess dao = new SQLDataAccess();
+        
         if (gameRequest.getGameName() == null || gameRequest.getGameName().isEmpty()) {
             return new GameResponse("Error: bad request");
         }
@@ -57,12 +53,8 @@ public class GameService {
      */
     public static GameResponse joinGame(GameRequest gameRequest) {
         String playerColor = gameRequest.getPlayerColor();
-        DataAccess dao;
-        try {
-            dao = new SQLDataAccess();
-        } catch (DataAccessException e) {
-            return new GameResponse(e.getMessage());
-        }
+        DataAccess dao = new SQLDataAccess();
+
         try {
             if (dao.findGame(gameRequest.getGameID()) == null) {
                 return new GameResponse("Error: bad request");
@@ -105,12 +97,8 @@ public class GameService {
      * @return GameResponse - a response that includes list of all the games or an error message
      */
     public static GameResponse listGames(String authToken) {
-        DataAccess dao;
-        try {
-            dao = new SQLDataAccess();
-        } catch (DataAccessException e) {
-            return new GameResponse(e.getMessage());
-        }
+        DataAccess dao = new SQLDataAccess();
+
         SessionData session = new SessionData();
         session.setAuthToken(authToken);
         try {

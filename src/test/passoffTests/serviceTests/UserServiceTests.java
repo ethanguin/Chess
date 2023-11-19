@@ -2,7 +2,6 @@ package passoffTests.serviceTests;
 
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
-import dataAccess.MemoryDataAccess;
 import dataAccess.SQLDataAccess;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
@@ -11,8 +10,8 @@ import req_Res.UserResponse;
 import service.UserService;
 
 public class UserServiceTests {
-    UserData testUser = new UserData("ethan", "password123", "me@me.org");
-    UserData failUser = new UserData("", "", "");
+    final UserData testUser = new UserData("ethan", "password123", "me@me.org");
+    final UserData failUser = new UserData("", "", "");
 
     @Test
     public void successfulCreateUser() throws DataAccessException {

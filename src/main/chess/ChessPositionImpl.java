@@ -6,15 +6,19 @@ public class ChessPositionImpl implements ChessPosition {
     int column;
     int row;
 
-    public ChessPositionImpl() {}
+    public ChessPositionImpl() {
+    }
+
     public ChessPositionImpl(char column, int row) {
-        this.column = (int)(column - 'a');
+        this.column = column - 'a';
         this.row = row;
     }
+
     public ChessPositionImpl(int column, int row) {
         this.column = column;
         this.row = row;
     }
+
     @Override
     public int getRow() {
         return row;
@@ -27,9 +31,10 @@ public class ChessPositionImpl implements ChessPosition {
 
     @Override
     public void setPosition(char column, int row) {
-        this.column = (int)(column - 'a');
+        this.column = column - 'a';
         this.row = row;
     }
+
     @Override
     public void setPosition(int column, int row) {
         this.column = column;

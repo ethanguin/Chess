@@ -9,10 +9,12 @@ import static chess.ChessPiece.PieceType.*;
 public class ChessPieceImpl implements ChessPiece {
     PieceType type;
     ChessGame.TeamColor color;
+
     public ChessPieceImpl(PieceType type, ChessGame.TeamColor color) {
         this.type = type;
         this.color = color;
     }
+
     @Override
     public ChessGame.TeamColor getTeamColor() {
         return this.color;
@@ -43,9 +45,9 @@ public class ChessPieceImpl implements ChessPiece {
             case ROOK -> rookMoves(myPosition, board);
             case KNIGHT -> knightMoves(myPosition, board);
             case PAWN -> pawnMoves(myPosition, board);
-            default -> null;
         };
     }
+
     private Collection<ChessMove> kingMoves(ChessPosition startPosition, ChessBoard board) {
         Collection<ChessMove> moves = new HashSet<>();
         ChessPosition endPosition = new ChessPositionImpl();
@@ -140,12 +142,14 @@ public class ChessPieceImpl implements ChessPiece {
         }
         return moves;
     }
+
     private Collection<ChessMove> queenMoves(ChessPosition startPosition, ChessBoard board) {
         //queen is basically a rook and a bishop, so call on both and return them
         Collection<ChessMove> moves = new HashSet<>(bishopMoves(startPosition, board));
         moves.addAll(rookMoves(startPosition, board));
         return moves;
     }
+
     private Collection<ChessMove> bishopMoves(ChessPosition startPosition, ChessBoard board) {
         Collection<ChessMove> moves = new HashSet<>();
         ChessPosition endPosition = new ChessPositionImpl();
@@ -228,6 +232,7 @@ public class ChessPieceImpl implements ChessPiece {
         }
         return moves;
     }
+
     private Collection<ChessMove> rookMoves(ChessPosition startPosition, ChessBoard board) {
         Collection<ChessMove> moves = new HashSet<>();
         ChessPosition endPosition = new ChessPositionImpl();
@@ -310,6 +315,7 @@ public class ChessPieceImpl implements ChessPiece {
         }
         return moves;
     }
+
     private Collection<ChessMove> knightMoves(ChessPosition startPosition, ChessBoard board) {
         Collection<ChessMove> moves = new HashSet<>();
         ChessPosition endPosition = new ChessPositionImpl();
@@ -404,6 +410,7 @@ public class ChessPieceImpl implements ChessPiece {
         }
         return moves;
     }
+
     private Collection<ChessMove> pawnMoves(ChessPosition startPosition, ChessBoard board) {
         Collection<ChessMove> moves = new HashSet<>();
         ChessPosition endPosition = new ChessPositionImpl();
@@ -470,16 +477,18 @@ public class ChessPieceImpl implements ChessPiece {
 
         return moves;
     }
+
     private Collection<ChessMove> getPromotions(ChessPosition start, ChessPosition end) {
         Collection<ChessMove> moves = new HashSet<>();
         //go through and add a move for each kind of promotion piece
         PieceType[] promotions = {QUEEN, ROOK, KNIGHT, BISHOP};
-        for (PieceType piece: promotions) {
+        for (PieceType piece : promotions) {
             moves.add(new ChessMoveImpl(start, end, piece));
         }
 
         return moves;
     }
+
     private boolean isOnBoard(ChessBoard board, ChessPosition position) {
         int boardSize = board.getSize() - 1;
         return (position.getColumn() <= boardSize && position.getColumn() >= 1 && position.getRow() <= boardSize && position.getRow() >= 1);

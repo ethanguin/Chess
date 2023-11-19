@@ -2,7 +2,6 @@ package model;
 
 import chess.ChessBoard;
 import chess.ChessBoardImpl;
-import chess.ChessGameImpl;
 import chess.ChessPiece;
 import com.google.gson.*;
 

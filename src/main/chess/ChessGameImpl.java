@@ -29,7 +29,7 @@ public class ChessGameImpl implements ChessGame {
             return null;
         }
 
-        //check for check on all of the moves, add the ones that aren't in check
+        //check for check on every move, add the ones that aren't in check
         Collection<ChessMove> allMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMovesList = new HashSet<>();
         //make a copy of the board to reset to

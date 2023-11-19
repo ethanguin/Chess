@@ -35,7 +35,7 @@ public class GameData {
     /**
      * the list of usernames of the users watching the game
      */
-    private Collection<String> watchers = new ArrayList<>();
+    private final Collection<String> watchers = new ArrayList<>();
 
     /**
      * the Chess Game assigned to the game, including pieces, chess board, and positions

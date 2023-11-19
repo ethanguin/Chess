@@ -2,7 +2,6 @@ package passoffTests.serviceTests;
 
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
-import dataAccess.MemoryDataAccess;
 import dataAccess.SQLDataAccess;
 import model.SessionData;
 import model.UserData;
@@ -12,9 +11,9 @@ import req_Res.SessionResponse;
 import service.SessionService;
 
 public class SessionServiceTests {
-    UserData testUser = new UserData("ethan", "password123", "me@me.org");
-    UserData failUser = new UserData("john", "", "me@me.org");
-    String authToken = "12345";
+    final UserData testUser = new UserData("ethan", "password123", "me@me.org");
+    final UserData failUser = new UserData("john", "", "me@me.org");
+    final String authToken = "12345";
 
     @Test
     public void successfulCreateSession() throws DataAccessException {

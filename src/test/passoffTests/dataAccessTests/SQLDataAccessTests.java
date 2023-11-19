@@ -1,4 +1,4 @@
-package passoffTests.DataAccessTests;
+package passoffTests.dataAccessTests;
 
 import chess.*;
 import com.google.gson.Gson;
@@ -15,11 +15,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class SQLDataAccessTests {
-    UserData testUser = new UserData("ethan", "password", "me@me.org");
-    String authToken = "abc1234";
-    SessionData testSession = new SessionData(authToken, testUser.getUsername());
+    final UserData testUser = new UserData("ethan", "password", "me@me.org");
+    final String authToken = "abc1234";
+    final SessionData testSession = new SessionData(authToken, testUser.getUsername());
 
-    GameData testGame = new GameData(1234, "gameTest", null, null, new ChessGameImpl());
+    final GameData testGame = new GameData(1234, "gameTest", null, null, new ChessGameImpl());
 
     @Test
     public void successfulClear() throws DataAccessException {

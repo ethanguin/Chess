@@ -22,12 +22,8 @@ public class SessionService {
         if (user.getUsername() == null || user.getPassword() == null || user.getUsername().isEmpty() || user.getPassword().isEmpty()) {
             return new SessionResponse(unauthorizedError);
         }
-        DataAccess dao;
-        try {
-            dao = new SQLDataAccess();
-        } catch (DataAccessException e) {
-            return new SessionResponse(e.getMessage());
-        }
+        DataAccess dao = new SQLDataAccess();
+        
         UserData foundUser;
         try {
             foundUser = dao.findUser(user);

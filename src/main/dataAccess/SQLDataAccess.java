@@ -3,13 +3,10 @@ package dataAccess;
 import chess.ChessBoard;
 import chess.ChessGame;
 import chess.ChessGameImpl;
-import chess.ChessPiece;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import model.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,7 +17,7 @@ import java.util.Scanner;
 public class SQLDataAccess implements DataAccess {
     private static final DatabaseConnector chessDatabase = new DatabaseConnector();
 
-    public SQLDataAccess() throws DataAccessException {
+    public SQLDataAccess() {
     }
 
     @Override

@@ -2,7 +2,6 @@ package passoffTests.serviceTests;
 
 import dataAccess.DataAccess;
 import dataAccess.DataAccessException;
-import dataAccess.MemoryDataAccess;
 import dataAccess.SQLDataAccess;
 import model.GameData;
 import model.SessionData;
@@ -14,8 +13,8 @@ import req_Res.GameResponse;
 import service.GameService;
 
 public class GameServiceTests {
-    UserData testUser = new UserData("ethan", "password123", "me@me.org");
-    SessionData testSession = new SessionData(testUser.getUsername());
+    final UserData testUser = new UserData("ethan", "password123", "me@me.org");
+    final SessionData testSession = new SessionData(testUser.getUsername());
 
     @Test
     public void successfulCreateGame() throws DataAccessException {
