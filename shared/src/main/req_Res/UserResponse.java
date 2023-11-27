@@ -19,6 +19,10 @@ public class UserResponse {
      */
     private String message;
 
+    public String getAuthToken() {
+        return authToken;
+    }
+
     public UserResponse(String username, String authToken) {
         this.username = username;
         this.authToken = authToken;

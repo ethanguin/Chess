@@ -6,16 +6,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/starter" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/libs" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="junit.jupiter" level="project" />
-    <orderEntry type="library" name="sparkjava.spark.core" level="project" />
+    <orderEntry type="library" scope="TEST" name="junit.jupiter" level="project" />
     <orderEntry type="library" name="google.code.gson" level="project" />
     <orderEntry type="library" name="slf4j.jcl.over" level="project" />
-    <orderEntry type="library" name="libs" level="project" />
-    <orderEntry type="library" name="mysql.connector.java" level="project" />
     <orderEntry type="module" module-name="shared" />
   </component>
 </module>

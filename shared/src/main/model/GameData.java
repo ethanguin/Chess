@@ -12,6 +12,15 @@ import java.util.Objects;
  */
 
 public class GameData {
+    enum GameState {
+        WHITE,
+        BLACK,
+        DRAW,
+        UNDECIDED
+    }
+
+    private GameState state = GameState.UNDECIDED;
+
     /**
      * a unique numerical ID that identifies a game
      */
@@ -100,6 +109,14 @@ public class GameData {
 
     public void setGame(ChessGame game) {
         this.game = game;
+    }
+
+    public GameState getState() {
+        return state;
+    }
+
+    public void setState(GameState state) {
+        this.state = state;
     }
 
     @Override

@@ -16,9 +16,11 @@ public interface ChessBoard {
     int getSize();
 
     ChessPosition findPiecePosition(ChessPiece piece);
+
     void removePiece(ChessPosition position);
 
     void movePiece(ChessPosition oldPos, ChessPosition newPos);
+
     void movePiece(ChessPosition oldPos, ChessPosition newPos, ChessPiece.PieceType promotionPiece);
 
     /**
@@ -36,4 +38,6 @@ public interface ChessBoard {
     void resetBoard();
 
     ChessBoard copy();
+
+    String toString(ChessGame.TeamColor color);
 }

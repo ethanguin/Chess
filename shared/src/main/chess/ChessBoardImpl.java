@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 import static chess.ChessPiece.PieceType.*;
@@ -106,6 +107,100 @@ public class ChessBoardImpl implements ChessBoard {
         board[8][1] = new ChessPieceImpl(ROOK, ChessGame.TeamColor.WHITE);
         board[1][8] = new ChessPieceImpl(ROOK, ChessGame.TeamColor.BLACK);
         board[8][8] = new ChessPieceImpl(ROOK, ChessGame.TeamColor.BLACK);
+    }
+
+    private static final int BLACK = 0;
+    private static final int RED = 1;
+    private static final int GREEN = 2;
+    private static final int YELLOW = 3;
+    private static final int BLUE = 4;
+    private static final int MAGENTA = 5;
+    private static final int CYAN = 6;
+    private static final int WHITE = 7;
+    private static final String COLOR_RESET = "\u001b[0m";
+
+    private static String color(int FG, int BG) {
+        return String.format("\u001b[3%d;4%dm", FG, BG);
+    }
+
+    private static String color(int FG) {
+        return String.format("\u001b[1;3%dm", FG);
+    }
+
+    private static final Map<ChessPiece.PieceType, String> pieceMap = Map.of(
+            ChessPiece.PieceType.KING, "K",
+            ChessPiece.PieceType.QUEEN, "Q",
+            ChessPiece.PieceType.BISHOP, "B",
+            ChessPiece.PieceType.KNIGHT, "N",
+            ChessPiece.PieceType.ROOK, "R",
+            ChessPiece.PieceType.PAWN, "P"
+    );
+
+    private static final String BORDER = color(WHITE, BLACK);
+
+    private static final String BOARD_BLACK = color(WHITE, BLACK);
+    private static final String BOARD_WHITE = color(BLACK, WHITE);
+    private static final String BOARD_HIGHLIGHT = color(GREEN, MAGENTA);
+
+    private static final String BLACK_PIECE = color(BLUE);
+    private static final String WHITE_PIECE = color(GREEN);
+
+    @Override
+    public String toString(ChessGame.TeamColor playerColor) {
+        var sb = new StringBuilder();
+        try {
+            var currentSquare = BOARD_WHITE;
+            var rows = new int[]{8, 7, 6, 5, 4, 3, 2, 1};
+            var columns = new int[]{1, 2, 3, 4, 5, 6, 7, 8};
+            var columnsLetters = "    a  b  c  d  e  f  g  h    ";
+            if (playerColor == ChessGame.TeamColor.BLACK) {
+                columnsLetters = "    h  g  f  e  d  c  b  a    ";
+                rows = new int[]{1, 2, 3, 4, 5, 6, 7, 8};
+                columns = new int[]{8, 7, 6, 5, 4, 3, 2, 1};
+            }
+            sb.append(BORDER).append(columnsLetters).append(COLOR_RESET).append("\n");
+            for (var i : rows) {
+                var row = " " + (i) + " ";
+                sb.append(BORDER).append(row).append(COLOR_RESET);
+                for (var j : columns) {
+                    var squareColor = currentSquare;
+                    var piece = board[j][i];
+                    if (piece != null) {
+                        var color = (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? WHITE_PIECE : BLACK_PIECE;
+                        var p = pieceMap.get(piece.getPieceType());
+                        sb.append(squareColor).append(color).append(" ").append(p).append(" ").append(COLOR_RESET);
+                    } else {
+                        sb.append(squareColor).append("   ").append(COLOR_RESET);
+                    }
+                    currentSquare = currentSquare.equals(BOARD_BLACK) ? BOARD_WHITE : BOARD_BLACK;
+                }
+                sb.append(BORDER).append(row).append(COLOR_RESET);
+                sb.append('\n');
+                currentSquare = currentSquare.equals(BOARD_BLACK) ? BOARD_WHITE : BOARD_BLACK;
+            }
+            sb.append(BORDER).append(columnsLetters).append(COLOR_RESET).append("\n");
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        }
+        return sb.toString();
+    }
+
+    public String blackToString() {
+        StringBuilder out = new StringBuilder();
+        for (int i = 1; i < boardSize; i++) {
+            out.append(" ");
+            for (int j = 1; j < boardSize; j++) {
+                if (board[j][i] != null) {
+                    out.append(board[j][i].toString());
+                    out.append("|");
+                } else {
+                    out.append(" ");
+                    out.append("|");
+                }
+            }
+            out.append("\n");
+        }
+        return out.toString();
     }
 
     @Override
