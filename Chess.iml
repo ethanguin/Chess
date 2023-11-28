@@ -14,8 +14,8 @@
     <orderEntry type="library" name="sparkjava.spark.core" level="project" />
     <orderEntry type="library" name="google.code.gson" level="project" />
     <orderEntry type="library" name="slf4j.jcl.over" level="project" />
-    <orderEntry type="library" name="libs" level="project" />
-    <orderEntry type="library" name="mysql.connector.java" level="project" />
     <orderEntry type="module" module-name="shared" />
+    <orderEntry type="library" name="mysql.connector.java" level="project" />
+    <orderEntry type="library" name="libs" level="project" />
   </component>
 </module>

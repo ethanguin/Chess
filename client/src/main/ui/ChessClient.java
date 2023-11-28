@@ -1,18 +1,12 @@
 package ui;
 
 import chess.ChessGame;
-import chess.ChessPosition;
 import chess.ChessPositionImpl;
 import model.GameData;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import req_Res.ResponseException;
-import util.EscapeSequences;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static util.EscapeSequences.*;
 
@@ -25,7 +19,7 @@ public class ChessClient {
     private GameData[] games;
     final private ServerFacade server;
 
-    public ChessClient() throws Exception {
+    public ChessClient() {
         server = new ServerFacade("http://localhost:8080");
     }
 
@@ -115,29 +109,11 @@ public class ChessClient {
             new HelpCommand("quit", "playing chess"),
             new HelpCommand("help", "with possible commands")
     );
-    static final List<HelpCommand> ObservingHelp = List.of(
-            new HelpCommand("legal", "moves for the current board (not fully implemented)"),
-            new HelpCommand("redraw", "the board"),
-            new HelpCommand("leave", "the game (not fully implemented)"),
-            new HelpCommand("quit", "playing chess"),
-            new HelpCommand("help", "with possible commands")
-    );
-
-    static final List<HelpCommand> playingHelp = List.of(
-            new HelpCommand("redraw", "the board"),
-            new HelpCommand("leave", "the game (not fully implemented)"),
-            new HelpCommand("move <fromColumn><fromRow><toColumn><toRow> [q|r|b|n]", "a piece with optional promotion (not fully implemented)"),
-            new HelpCommand("resign", "the game without leaving it (not fully implemented)"),
-            new HelpCommand("legal <cr>", "moves a given piece (not fully implemented)"),
-            new HelpCommand("quit", "playing chess"),
-            new HelpCommand("help", "with possible commands")
-    );
 
     private String help() {
         List<HelpCommand> helpCommandList = switch (userState) {
             case LOGGED_IN -> loggedInCommands;
-            case OBSERVING -> ObservingHelp;
-            case BLACK_PLAYER, WHITE_PLAYER -> playingHelp;
+            case LOGGED_OUT -> loggedOutCommands;
             default -> loggedOutCommands;
         };
 
@@ -269,11 +245,11 @@ public class ChessClient {
         return "Failure";
     }
 
-    private String move(String[] params) throws Exception {
+    private String move(String[] params) {
         return "Method not implemented yet";
     }
 
-    private String leave(String[] params) throws Exception {
+    private String leave(String[] params) {
         if (userState == State.WHITE_PLAYER || userState == State.BLACK_PLAYER || userState == State.OBSERVING) {
             userState = State.LOGGED_IN;
             gameData = null;
@@ -282,19 +258,8 @@ public class ChessClient {
         return "Failure";
     }
 
-    private String resign(String[] params) throws Exception {
+    private String resign(String[] params) {
         return "Method not implemented yet";
-    }
-
-    private void printGame() {
-        ChessGame.TeamColor color;
-        if (userState.equals(State.BLACK_PLAYER)) {
-            color = ChessGame.TeamColor.BLACK;
-        } else {
-            color = ChessGame.TeamColor.WHITE;
-        }
-        System.out.println("\n");
-        System.out.println(gameData.getGame().getBoard().toString(color));
     }
 
     private void printGameBothSides() {

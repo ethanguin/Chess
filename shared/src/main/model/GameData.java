@@ -12,12 +12,7 @@ import java.util.Objects;
  */
 
 public class GameData {
-    enum GameState {
-        WHITE,
-        BLACK,
-        DRAW,
-        UNDECIDED
-    }
+
 
     private GameState state = GameState.UNDECIDED;
 

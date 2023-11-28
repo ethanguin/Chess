@@ -25,7 +25,7 @@ public class ServerFacade {
 
 
     public void clear() throws ResponseException {
-        var r = this.makeRequest("DELETE", "/db", null, null, ClearResponse.class);
+        this.makeRequest("DELETE", "/db", null, null, ClearResponse.class);
     }
 
     public UserResponse register(String username, String password, String email) throws ResponseException {

@@ -13,7 +13,7 @@ public class MemoryDataAccess implements DataAccess {
     private final static Collection<SessionData> sessions = new HashSet<>();
 
     @Override
-    public void clear() throws DataAccessException {
+    public void clear() {
         users.clear();
         games.clear();
         sessions.clear();
@@ -70,7 +70,7 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void createGame(GameData game) throws DataAccessException {
+    public void createGame(GameData game) {
         games.add(game);
     }
 
