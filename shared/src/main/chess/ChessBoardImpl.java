@@ -7,12 +7,8 @@ import java.util.Objects;
 import static chess.ChessPiece.PieceType.*;
 
 public class ChessBoardImpl implements ChessBoard {
-    private final int boardSize = 8 + 1;
+    int boardSize = 8 + 1;
     ChessPiece[][] board = new ChessPiece[boardSize][boardSize];
-
-    public ChessBoardImpl() {
-        resetBoard();
-    }
 
     @Override
     public void addPiece(ChessPosition position, ChessPiece piece) {
@@ -109,6 +105,39 @@ public class ChessBoardImpl implements ChessBoard {
         board[8][8] = new ChessPieceImpl(ROOK, ChessGame.TeamColor.BLACK);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder out = new StringBuilder();
+        for (int i = boardSize - 1; i > 0; i--) {
+            out.append("|");
+            for (int j = 1; j < boardSize; j++) {
+                if (board[j][i] != null) {
+                    out.append(board[j][i].toString());
+                    out.append("|");
+                } else {
+                    out.append(" ");
+                    out.append("|");
+                }
+            }
+            out.append("\n");
+        }
+        return out.toString();
+    }
+
+    @Override
+    public ChessBoard copy() {
+        ChessBoard boardCopy = new ChessBoardImpl();
+        for (int i = 1; i < boardSize; i++) {
+            for (int j = 1; j < boardSize; j++) {
+                if (board[i][j] == null) {
+                    continue;
+                }
+                boardCopy.addPiece(new ChessPositionImpl(i, j), new ChessPieceImpl(board[i][j].getPieceType(), board[i][j].getTeamColor()));
+            }
+        }
+        return boardCopy;
+    }
+
     private static final int BLACK = 0;
     private static final int RED = 1;
     private static final int GREEN = 2;
@@ -201,39 +230,6 @@ public class ChessBoardImpl implements ChessBoard {
             out.append("\n");
         }
         return out.toString();
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder out = new StringBuilder();
-        for (int i = boardSize - 1; i > 0; i--) {
-            out.append("|");
-            for (int j = 1; j < boardSize; j++) {
-                if (board[j][i] != null) {
-                    out.append(board[j][i].toString());
-                    out.append("|");
-                } else {
-                    out.append(" ");
-                    out.append("|");
-                }
-            }
-            out.append("\n");
-        }
-        return out.toString();
-    }
-
-    @Override
-    public ChessBoard copy() {
-        ChessBoard boardCopy = new ChessBoardImpl();
-        for (int i = 1; i < boardSize; i++) {
-            for (int j = 1; j < boardSize; j++) {
-                if (board[i][j] == null) {
-                    continue;
-                }
-                boardCopy.addPiece(new ChessPositionImpl(i, j), new ChessPieceImpl(board[i][j].getPieceType(), board[i][j].getTeamColor()));
-            }
-        }
-        return boardCopy;
     }
 
     @Override
