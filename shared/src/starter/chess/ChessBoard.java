@@ -1,5 +1,7 @@
 package chess;
 
+import java.util.Collection;
+
 /**
  * A chessboard that can hold and rearrange chess pieces
  */
@@ -39,5 +41,5 @@ public interface ChessBoard {
 
     ChessBoard copy();
 
-    String toString(ChessGame.TeamColor color);
+    String toString(ChessGame.TeamColor color, Collection<ChessPosition> highlights);
 }

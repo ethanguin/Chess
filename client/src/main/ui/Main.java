@@ -17,7 +17,7 @@ public class Main {
                 String input = scanner.nextLine();
 
                 try {
-                    result = client.eval(input);
+                    result = client.execute(input);
                     System.out.print(RESET_TEXT_COLOR + result);
                 } catch (Throwable e) {
                     System.out.println(e.getMessage());

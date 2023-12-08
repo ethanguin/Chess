@@ -1,29 +1,61 @@
 package ui;
 
-import chess.ChessGame;
-import chess.ChessPositionImpl;
+import chess.*;
 import model.GameData;
 import req_Res.ResponseException;
+import webSocketMessages.userCommands.MoveCommand;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import static ui.ChessClient.State.BLACK_PLAYER;
 import static util.EscapeSequences.*;
 
-public class ChessClient {
-    enum State {LOGGED_OUT, LOGGED_IN, OBSERVING, BLACK_PLAYER, WHITE_PLAYER}
+public class ChessClient implements DisplayRequests {
+    @Override
+    public void updateBoard(GameData updatedGameData) {
+        gameData = updatedGameData;
+        printGame();
+        printPrompt();
+
+        if (isGameOver()) {
+            userState = State.LOGGED_IN;
+            printPrompt();
+            gameData = null;
+        }
+    }
+
+    @Override
+    public void message(String message) {
+        System.out.println();
+        System.out.println(SET_TEXT_COLOR_MAGENTA + "NOTIFY: " + message);
+        printPrompt();
+    }
+
+    @Override
+    public void error(String message) {
+        System.out.println();
+        System.out.println(SET_TEXT_COLOR_RED + "NOTIFY: " + message);
+        printPrompt();
+    }
+
+    enum State {LOGGED_OUT, LOGGED_IN, OBSERVER, BLACK_PLAYER, WHITE_PLAYER}
 
     private State userState = State.LOGGED_OUT;
     private String authToken;
     private GameData gameData;
     private GameData[] games;
+    final private WebSocketFacade webSocket;
     final private ServerFacade server;
 
-    public ChessClient() {
+    public ChessClient() throws Exception {
         server = new ServerFacade("http://localhost:8080");
+        webSocket = new WebSocketFacade("ws://localhost:8080/connect", this);
     }
 
-    public String eval(String input) {
+    public String execute(String input) {
         String result = "Error with command. Try using \"Help\"";
         input = input.toLowerCase();
         String[] tokens = input.split(" ");
@@ -75,45 +107,54 @@ public class ChessClient {
             if (command.equals("legal")) {
                 return legal(params);
             }
-
         } catch (Exception e) {
             result = "Error with command: " + e.getMessage();
         }
-
-
         return result;
-    }
-
-    private String clear() throws Exception {
-        server.clear();
-        userState = State.LOGGED_OUT;
-        gameData = null;
-        return "Successfully cleared";
     }
 
     private record HelpCommand(String command, String description) {
     }
 
     static final List<HelpCommand> loggedOutCommands = List.of(
-            new HelpCommand("register <USERNAME> <PASSWORD> <EMAIL>", "to create a new account"),
-            new HelpCommand("login <USERNAME> <PASSWORD>", "to play chess"),
-            new HelpCommand("quit", "playing chess"),
-            new HelpCommand("help", "with possible commands")
+            new HelpCommand("register <USERNAME> <PASSWORD> <EMAIL>", "create a new account"),
+            new HelpCommand("login <USERNAME> <PASSWORD>", "login specified user"),
+            new HelpCommand("quit", "quit the client program"),
+            new HelpCommand("help", "lists possible commands")
     );
     static final List<HelpCommand> loggedInCommands = List.of(
-            new HelpCommand("create <NAME>", "a game"),
-            new HelpCommand("list", "games"),
-            new HelpCommand("join <ID> [WHITE|BLACK]", "a game"),
-            new HelpCommand("observe <ID>", "a game"),
-            new HelpCommand("logout", "when you are done"),
-            new HelpCommand("quit", "playing chess"),
-            new HelpCommand("help", "with possible commands")
+            new HelpCommand("create <NAME>", "create a new game"),
+            new HelpCommand("list", "list all current games"),
+            new HelpCommand("join <ID> [WHITE|BLACK]", "join a game"),
+            new HelpCommand("observe <ID>", "observe a game"),
+            new HelpCommand("logout", "logout current user"),
+            new HelpCommand("quit", "quit the client program"),
+            new HelpCommand("help", "lists possible commands")
+    );
+
+    static final List<HelpCommand> observingCommands = List.of(
+            new HelpCommand("legal", "moves for the current board"),
+            new HelpCommand("redraw", "redraw the board"),
+            new HelpCommand("leave", "leave the current game"),
+            new HelpCommand("quit", "quit the client program"),
+            new HelpCommand("help", "lists possible commands")
+    );
+
+    static final List<HelpCommand> playingCommands = List.of(
+            new HelpCommand("redraw", "redraw the board"),
+            new HelpCommand("leave", "leave the current game"),
+            new HelpCommand("move <FromColumn><FromRow><ToColumn><ToRow> [q|r|b|n]", "move a piece [with optional promotion]"),
+            new HelpCommand("resign", "resign the game without leaving it"),
+            new HelpCommand("legal <Column><Row>", "gives the legal moves a given piece can do"),
+            new HelpCommand("quit", "quit the client program"),
+            new HelpCommand("help", "lists possible commands")
     );
 
     private String help() {
         List<HelpCommand> helpCommandList = switch (userState) {
             case LOGGED_IN -> loggedInCommands;
-            case LOGGED_OUT -> loggedOutCommands;
+            case OBSERVER -> observingCommands;
+            case BLACK_PLAYER, WHITE_PLAYER -> playingCommands;
             default -> loggedOutCommands;
         };
 
@@ -122,6 +163,13 @@ public class ChessClient {
             sb.append(String.format("  %s%s%s - %s%s%s%n", SET_TEXT_COLOR_YELLOW, me.command, RESET_TEXT_COLOR, RESET_TEXT_COLOR, me.description, RESET_TEXT_COLOR));
         }
         return sb.toString();
+    }
+
+    private String clear() throws Exception {
+        server.clear();
+        userState = State.LOGGED_OUT;
+        gameData = null;
+        return "Successfully cleared";
     }
 
 
@@ -196,7 +244,7 @@ public class ChessClient {
                 var gameID = Integer.parseInt(params[0]);
                 var color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
                 gameData = server.joinGame(authToken, gameID, color);
-                userState = (color == ChessGame.TeamColor.WHITE ? State.WHITE_PLAYER : State.BLACK_PLAYER);
+                userState = (color == ChessGame.TeamColor.WHITE ? State.WHITE_PLAYER : BLACK_PLAYER);
                 printGameBothSides();
                 return String.format("Joined %d as %s", gameID, color);
             }
@@ -210,7 +258,7 @@ public class ChessClient {
             if (params.length == 1) {
                 var gameID = Integer.parseInt(params[0]);
                 gameData = server.observeGame(authToken, gameID);
-                userState = State.OBSERVING;
+                userState = State.OBSERVER;
                 printGameBothSides();
                 return String.format("Joined %d as observer", gameID);
             }
@@ -221,7 +269,7 @@ public class ChessClient {
 
     private String redraw(String[] params) throws Exception {
         verifyAuth();
-        if (userState == State.BLACK_PLAYER || userState == State.WHITE_PLAYER || userState == State.OBSERVING) {
+        if (userState == BLACK_PLAYER || userState == State.WHITE_PLAYER || userState == State.OBSERVER) {
             printGameBothSides();
             return "";
         }
@@ -230,27 +278,50 @@ public class ChessClient {
 
     private String legal(String[] params) throws Exception {
         verifyAuth();
-        if (userState == State.BLACK_PLAYER || userState == State.WHITE_PLAYER || userState == State.OBSERVING) {
+        if (userState == BLACK_PLAYER || userState == State.WHITE_PLAYER || userState == State.OBSERVER) {
             if (params.length == 1) {
                 var pos = new ChessPositionImpl(params[0]);
-                StringBuilder sb = new StringBuilder();
+                var highlights = new ArrayList<ChessPosition>();
+                highlights.add(pos);
                 for (var move : gameData.getGame().validMoves(pos)) {
-                    sb.append(move.toString());
-                    sb.append("\n");
+                    highlights.add(move.getEndPosition());
                 }
-
-                return sb.toString();
+                var color = userState == BLACK_PLAYER ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+                printGame(color, highlights);
+                return "";
             }
         }
         return "Failure";
     }
 
-    private String move(String[] params) {
-        return "Method not implemented yet";
+    private String move(String[] params) throws Exception {
+        verifyAuth();
+        if (params.length == 1) {
+            var move = new ChessMoveImpl(params[0]);
+            if (isMoveLegal(move)) {
+                webSocket.sendCommand(new MoveCommand(authToken, gameData.gameID(), move));
+                return "Success";
+            }
+        }
+        return "Failure";
+    }
+
+    public boolean isMoveLegal(ChessMoveImpl move) {
+        if (isTurn()) {
+            Chess board = gameData.getGame().getBoard();
+            var piece = board.getPiece(move.getStartPosition());
+            if (piece != null) {
+                var validMoves = piece.pieceMoves(board, move.getStartPosition());
+                if (validMoves.contains(move)) {
+                    return board.isMoveLegal(move);
+                }
+            }
+        }
+        return false;
     }
 
     private String leave(String[] params) {
-        if (userState == State.WHITE_PLAYER || userState == State.BLACK_PLAYER || userState == State.OBSERVING) {
+        if (userState == State.WHITE_PLAYER || userState == BLACK_PLAYER || userState == State.OBSERVER) {
             userState = State.LOGGED_IN;
             gameData = null;
             return "Left game";
@@ -262,10 +333,21 @@ public class ChessClient {
         return "Method not implemented yet";
     }
 
+    private void printGame() {
+        var color = userState == BLACK_PLAYER ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+        printGame(color, null);
+    }
+
+    private void printGame(ChessGame.TeamColor color, Collection<ChessPosition> highlights) {
+        System.out.println("\n");
+        System.out.print((gameData.getGame().getBoard()).toString(color, highlights));
+        System.out.println();
+    }
+
     private void printGameBothSides() {
         System.out.println("\n");
-        System.out.println(gameData.getGame().getBoard().toString(ChessGame.TeamColor.WHITE));
+        System.out.println(gameData.getGame().getBoard().toString(ChessGame.TeamColor.WHITE, null));
         System.out.println("\n");
-        System.out.println(gameData.getGame().getBoard().toString(ChessGame.TeamColor.BLACK));
+        System.out.println(gameData.getGame().getBoard().toString(ChessGame.TeamColor.BLACK, null));
     }
 }
