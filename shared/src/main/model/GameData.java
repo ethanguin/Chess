@@ -14,7 +14,7 @@ import java.util.Objects;
 public class GameData {
 
 
-    private GameState state = GameState.UNDECIDED;
+    public GameState state = GameState.UNDECIDED;
 
     /**
      * a unique numerical ID that identifies a game

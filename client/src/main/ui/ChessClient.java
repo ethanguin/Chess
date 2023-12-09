@@ -2,8 +2,8 @@ package ui;
 
 import chess.*;
 import model.GameData;
+import model.GameState;
 import req_Res.ResponseException;
-import webSocketMessages.userCommands.MoveCommand;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,41 +14,20 @@ import static ui.ChessClient.State.BLACK_PLAYER;
 import static util.EscapeSequences.*;
 
 public class ChessClient implements DisplayRequests {
-    @Override
-    public void updateBoard(GameData updatedGameData) {
-        gameData = updatedGameData;
-        printGame();
-        printPrompt();
+    enum State {
+        LOGGED_OUT, LOGGED_IN, OBSERVER, BLACK_PLAYER, WHITE_PLAYER;
 
-        if (isGameOver()) {
-            userState = State.LOGGED_IN;
-            printPrompt();
-            gameData = null;
+        public boolean isTurn(ChessGame.TeamColor color) {
+            return (color.toString().equals(this.toString()));
         }
     }
 
-    @Override
-    public void message(String message) {
-        System.out.println();
-        System.out.println(SET_TEXT_COLOR_MAGENTA + "NOTIFY: " + message);
-        printPrompt();
-    }
-
-    @Override
-    public void error(String message) {
-        System.out.println();
-        System.out.println(SET_TEXT_COLOR_RED + "NOTIFY: " + message);
-        printPrompt();
-    }
-
-    enum State {LOGGED_OUT, LOGGED_IN, OBSERVER, BLACK_PLAYER, WHITE_PLAYER}
-
-    private State userState = State.LOGGED_OUT;
-    private String authToken;
-    private GameData gameData;
-    private GameData[] games;
     final private WebSocketFacade webSocket;
     final private ServerFacade server;
+    private String authToken;
+    private GameData gameData;
+    private GameData[] gameDataList;
+    private State userState = State.LOGGED_OUT;
 
     public ChessClient() throws Exception {
         server = new ServerFacade("http://localhost:8080");
@@ -227,10 +206,10 @@ public class ChessClient implements DisplayRequests {
 
     private String list() throws ResponseException {
         verifyAuth();
-        games = server.listGames(authToken);
+        gameDataList = server.listGames(authToken);
         StringBuilder sb = new StringBuilder();
-        for (var i = 0; i < games.length; i++) {
-            var game = games[i];
+        for (var i = 0; i < gameDataList.length; i++) {
+            var game = gameDataList[i];
             var gameText = String.format("%d. %s ID:%d white:%s black:%s state: %s%n", i + 1, game.getGameName(), game.getGameID(), game.getWhiteUsername(), game.getBlackUsername(), game.getState());
             sb.append(gameText);
         }
@@ -299,7 +278,7 @@ public class ChessClient implements DisplayRequests {
         if (params.length == 1) {
             var move = new ChessMoveImpl(params[0]);
             if (isMoveLegal(move)) {
-                webSocket.sendCommand(new MoveCommand(authToken, gameData.gameID(), move));
+                //webSocket.sendCommand(new MoveCommand(authToken, gameData.getGameID(), move));
                 return "Success";
             }
         }
@@ -308,14 +287,9 @@ public class ChessClient implements DisplayRequests {
 
     public boolean isMoveLegal(ChessMoveImpl move) {
         if (isTurn()) {
-            Chess board = gameData.getGame().getBoard();
-            var piece = board.getPiece(move.getStartPosition());
-            if (piece != null) {
-                var validMoves = piece.pieceMoves(board, move.getStartPosition());
-                if (validMoves.contains(move)) {
-                    return board.isMoveLegal(move);
-                }
-            }
+            ChessGame game = gameData.getGame();
+            Collection<ChessMove> validMoves = game.validMoves(move.getStartPosition());
+            return validMoves.contains(move);
         }
         return false;
     }
@@ -349,5 +323,49 @@ public class ChessClient implements DisplayRequests {
         System.out.println(gameData.getGame().getBoard().toString(ChessGame.TeamColor.WHITE, null));
         System.out.println("\n");
         System.out.println(gameData.getGame().getBoard().toString(ChessGame.TeamColor.BLACK, null));
+    }
+
+    public boolean isPlayer() {
+        return (gameData != null && (userState == State.WHITE_PLAYER || userState == BLACK_PLAYER) && !isGameOver());
+    }
+
+
+    public boolean isObserver() {
+        return (gameData != null && (userState == State.OBSERVER));
+    }
+
+    public boolean isGameOver() {
+        return (gameData != null && gameData.getState() != GameState.UNDECIDED);
+    }
+
+    public boolean isTurn() {
+        return (isPlayer() && userState.isTurn(gameData.getGame().getTeamTurn()));
+    }
+
+    @Override
+    public void updateBoard(GameData updatedGameData) {
+        gameData = updatedGameData;
+        printGame();
+        printPrompt();
+
+        if (isGameOver()) {
+            userState = State.LOGGED_IN;
+            printPrompt();
+            gameData = null;
+        }
+    }
+
+    @Override
+    public void message(String message) {
+        System.out.println();
+        System.out.println(SET_TEXT_COLOR_MAGENTA + "NOTIFY: " + message);
+        printPrompt();
+    }
+
+    @Override
+    public void error(String message) {
+        System.out.println();
+        System.out.println(SET_TEXT_COLOR_RED + "NOTIFY: " + message);
+        printPrompt();
     }
 }

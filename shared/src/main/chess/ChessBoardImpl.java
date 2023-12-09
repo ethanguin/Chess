@@ -194,9 +194,6 @@ public class ChessBoardImpl implements ChessBoard {
                 sb.append(BORDER).append(row).append(COLOR_RESET);
                 for (var j : columns) {
                     var squareColor = currentSquare;
-                    if (highlights != null && highlights.contains(new ChessPositionImpl(i, j))) {
-                        squareColor = BOARD_HIGHLIGHT;
-                    }
                     var piece = board[j][i];
                     if (piece != null) {
                         var color = (piece.getTeamColor() == ChessGame.TeamColor.WHITE) ? WHITE_PIECE : BLACK_PIECE;

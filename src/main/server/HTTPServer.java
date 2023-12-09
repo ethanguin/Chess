@@ -6,7 +6,14 @@ import handlers.*;
 
 import java.util.*;
 
+import static spark.Spark.webSocket;
+
 public class HTTPServer {
+    WebSocketHandler webSocketHandler;
+
+    public HTTPServer() {
+        webSocketHandler = new WebSocketHandler();
+    }
 
     public static void main(String[] args) {
         new HTTPServer().run();
@@ -18,6 +25,9 @@ public class HTTPServer {
 
         //Register a directory for hosting static files
         Spark.externalStaticFileLocation("web");
+
+        //WebSocket handler
+        webSocket("/connect", webSocketHandler);
 
         //Error
         Spark.get("/error", this::throwError);

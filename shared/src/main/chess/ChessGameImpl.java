@@ -9,6 +9,7 @@ public class ChessGameImpl implements ChessGame {
     ChessBoard board = new ChessBoardImpl();
 
     public ChessGameImpl() {
+        board.resetBoard();
         setTeamTurn(TeamColor.WHITE);
     }
 
