@@ -1,6 +1,9 @@
 package handlers;
 
+import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import dataAccess.*;
@@ -24,7 +27,7 @@ import static chess.ChessGame.TeamColor.*;
 @WebSocket
 public class WebSocketHandler {
 
-    private final DataAccess dataAccess = new SQLDataAccess();
+    private final DataAccess dao = new SQLDataAccess();
 
     public static class Connection {
         public UserData user;
@@ -81,13 +84,13 @@ public class WebSocketHandler {
 
         public void announceMessage(int gameID, String excludeUsername, String msg) throws Exception {
             var removeList = new ArrayList<Connection>();
-            for (var c : connections.values()) {
-                if (c.session.isOpen()) {
-                    if (c.game.getGameID() == gameID && !c.user.getUsername().equals(excludeUsername)) {
-                        c.send(msg);
+            for (Connection connection : connections.values()) {
+                if (connection.session.isOpen()) {
+                    if (connection.game.getGameID() == gameID && !connection.user.getUsername().equals(excludeUsername)) {
+                        connection.send(msg);
                     }
                 } else {
-                    removeList.add(c);
+                    removeList.add(connection);
                 }
             }
 
@@ -98,11 +101,10 @@ public class WebSocketHandler {
 
         @Override
         public String toString() {
-            var sb = new StringBuilder("[\n");
-            for (var c : connections.values()) {
-                sb.append(String.format("  {'game':%d, 'user': %s}%n", c.game.getGameID(), c.user));
+            var sb = new StringBuilder("\n");
+            for (Connection connection : connections.values()) {
+                sb.append(String.format("  {'game':%d, 'user': %s}%n", connection.game.getGameID(), connection.user));
             }
-            sb.append("]");
             return sb.toString();
         }
     }
@@ -128,7 +130,7 @@ public class WebSocketHandler {
             var connection = getConnection(command.getAuthString(), session);
             if (connection != null) {
                 switch (command.getCommandType()) {
-                    case JOIN_PLAYER -> join(connection, readJson(message, JoinPlayerCommand.class));
+                    case JOIN_PLAYER -> join(connection, readJson(message, PlayerJoinCommand.class));
                     case JOIN_OBSERVER -> observe(connection, command);
                     case MAKE_MOVE -> move(connection, readJson(message, MoveCommand.class));
                     case LEAVE -> leave(connection, command);
@@ -138,12 +140,12 @@ public class WebSocketHandler {
                 Connection.sendError(session.getRemote(), "unknown user");
             }
         } catch (Exception e) {
-            Connection.sendError(session.getRemote(), e.getMessage());
+            Connection.sendError(session.getRemote(), "Error: " + e.getMessage());
         }
     }
 
-    private void join(Connection connection, JoinPlayerCommand command) throws Exception {
-        var gameData = dataAccess.findGame(command.gameID);
+    private void join(Connection connection, PlayerJoinCommand command) throws Exception {
+        var gameData = dao.findGame(command.gameID);
         if (gameData != null) {
             String expectedUsername = (command.playerColor == ChessGame.TeamColor.BLACK) ? gameData.getBlackUsername() : gameData.getWhiteUsername();
             if (expectedUsername.equals(connection.user.getUsername())) {
@@ -162,7 +164,7 @@ public class WebSocketHandler {
     }
 
     private void observe(Connection connection, GameCommand command) throws Exception {
-        GameData gameData = dataAccess.findGame(command.gameID);
+        GameData gameData = dao.findGame(command.gameID);
         if (gameData != null) {
             connection.game = gameData;
             String loadMsg = (new LoadMessage(gameData)).toString();
@@ -176,7 +178,7 @@ public class WebSocketHandler {
     }
 
     private void move(Connection connection, MoveCommand command) throws Exception {
-        GameData gameData = dataAccess.findGame(command.gameID);
+        GameData gameData = dao.findGame(command.gameID);
         if (gameData != null) {
             if (gameData.getState() == GameState.UNDECIDED) {
                 gameData.getGame().makeMove(command.move);
@@ -186,7 +188,7 @@ public class WebSocketHandler {
                 gameData = handleGameStateChange(gameData);
                 Gson gson = new Gson();
                 String gameSerialized = gson.toJson(gameData.getGame());
-                dataAccess.updateGame(gameData.getGameID(), gameSerialized);
+                dao.updateGame(gameData.getGameID(), gameSerialized);
                 connection.game = gameData;
 
                 String loadMsg = (new LoadMessage(gameData)).toString();
@@ -200,16 +202,16 @@ public class WebSocketHandler {
     }
 
     private void leave(Connection connection, GameCommand command) throws Exception {
-        GameData gameData = dataAccess.findGame(command.gameID);
+        GameData gameData = dao.findGame(command.gameID);
         if (gameData != null) {
-            if (gameData.getBlackUsername().equals(connection.user.getUsername())) {
+            if (connection.user.getUsername().equals(gameData.getBlackUsername())) {
                 gameData.setBlackUsername(null);
             } else if (gameData.getWhiteUsername().equals(connection.user.getUsername())) {
                 gameData.setWhiteUsername(null);
             }
             Gson gson = new Gson();
             String gameSerialized = gson.toJson(gameData.getGame());
-            dataAccess.updateGame(gameData.getGameID(), gameSerialized);
+            dao.updateGame(gameData.getGameID(), gameSerialized, gameData.getWhiteUsername(), gameData.getBlackUsername());
             connections.remove(connection.session);
             var notificationMsg = (new NotificationMessage(String.format("%s left", connection.user.getUsername()))).toString();
             connections.announceMessage(gameData.getGameID(), "", notificationMsg);
@@ -219,7 +221,7 @@ public class WebSocketHandler {
     }
 
     private void resign(Connection connection, GameCommand command) throws Exception {
-        GameData gameData = dataAccess.findGame(command.gameID);
+        GameData gameData = dao.findGame(command.gameID);
         if (gameData != null) {
             var color = getPlayerColor(gameData, connection.user.getUsername());
             if (color != null) {
@@ -227,7 +229,7 @@ public class WebSocketHandler {
                 gameData.setState(state);
                 Gson gson = new Gson();
                 String gameSerialized = gson.toJson(gameData.getGame());
-                dataAccess.updateGame(gameData.getGameID(), gameSerialized);
+                dao.updateGame(gameData.getGameID(), gameSerialized);
                 connection.game = gameData;
 
                 String notificationMsg = (new NotificationMessage(String.format("%s resigned", connection.user.getUsername()))).toString();
@@ -278,8 +280,9 @@ public class WebSocketHandler {
         GsonBuilder gsonBuilder = new GsonBuilder();
 
         gsonBuilder.registerTypeAdapter(ChessGame.class, new ChessGameAdapter());
-        gsonBuilder.registerTypeAdapter(ChessGame.class, new ChessPieceAdapter());
-        gsonBuilder.registerTypeAdapter(ChessGame.class, new ChessBoardAdapter());
+        gsonBuilder.registerTypeAdapter(ChessPiece.class, new ChessPieceAdapter());
+        gsonBuilder.registerTypeAdapter(ChessBoard.class, new ChessBoardAdapter());
+        gsonBuilder.registerTypeAdapter(ChessMove.class, new ChessMoveAdapter());
 
 
         var obj = gsonBuilder.create().fromJson(json, clazz);
@@ -296,7 +299,7 @@ public class WebSocketHandler {
         if (authData != null) {
             connection = connections.get(authData.getUsername());
             if (connection == null) {
-                var user = dataAccess.findUser(new UserData(authData.getUsername()));
+                var user = dao.findUser(new UserData(authData.getUsername()));
                 connection = new Connection(user, session);
                 connections.add(authData.getUsername(), connection);
             }
@@ -307,7 +310,11 @@ public class WebSocketHandler {
 
     public SessionData isAuthorized(String token) throws DataAccessException {
         if (token != null) {
-            return dataAccess.findSession(new SessionData(token));
+            SessionData session = new SessionData();
+            session.setAuthToken(token);
+            var foundSession = dao.findSession(session);
+            var newToken = foundSession.getAuthToken();
+            return foundSession;
         }
         return null;
     }

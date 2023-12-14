@@ -1,5 +1,10 @@
 package chess;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import model.*;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -10,7 +15,7 @@ public class ChessGameImpl implements ChessGame {
 
     public ChessGameImpl() {
         board.resetBoard();
-        setTeamTurn(TeamColor.WHITE);
+        turn = TeamColor.WHITE;
     }
 
     @Override
@@ -180,5 +185,15 @@ public class ChessGameImpl implements ChessGame {
     @Override
     public int hashCode() {
         return Objects.hash(turn, board);
+    }
+
+    public static Gson serializer() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(ChessGame.class, new ChessGameAdapter());
+        gsonBuilder.registerTypeAdapter(ChessBoard.class, new ChessBoardAdapter());
+        gsonBuilder.registerTypeAdapter(ChessPiece.class, new ChessPieceAdapter());
+        gsonBuilder.registerTypeAdapter(ChessMove.class, new ChessMoveAdapter());
+        gsonBuilder.registerTypeAdapter(ChessPosition.class, new ChessPositionAdapter());
+        return gsonBuilder.create();
     }
 }

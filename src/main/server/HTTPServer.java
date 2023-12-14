@@ -16,7 +16,8 @@ public class HTTPServer {
     }
 
     public static void main(String[] args) {
-        new HTTPServer().run();
+        var server = new HTTPServer();
+        server.run();
     }
 
     private void run() {

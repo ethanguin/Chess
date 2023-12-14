@@ -75,6 +75,11 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
+    public void updateGame(int gameID, String chessGame, String whiteUsername, String blackUsername) throws DataAccessException {
+        findGame(gameID).setGameName(chessGame);
+    }
+
+    @Override
     public void updateGame(int gameID, String chessGame) throws DataAccessException {
         findGame(gameID).setGameName(chessGame);
     }

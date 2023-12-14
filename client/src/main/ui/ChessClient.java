@@ -4,18 +4,22 @@ import chess.*;
 import model.GameData;
 import model.GameState;
 import req_Res.ResponseException;
+import webSocketMessages.userCommands.GameCommand;
+import webSocketMessages.userCommands.MoveCommand;
+import webSocketMessages.userCommands.PlayerJoinCommand;
+import webSocketMessages.userCommands.UserGameCommand;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static ui.ChessClient.State.BLACK_PLAYER;
+import static ui.ChessClient.State.BLACK;
 import static util.EscapeSequences.*;
 
 public class ChessClient implements DisplayRequests {
     enum State {
-        LOGGED_OUT, LOGGED_IN, OBSERVER, BLACK_PLAYER, WHITE_PLAYER;
+        LOGGED_OUT, LOGGED_IN, OBSERVER, BLACK, WHITE;
 
         public boolean isTurn(ChessGame.TeamColor color) {
             return (color.toString().equals(this.toString()));
@@ -92,6 +96,7 @@ public class ChessClient implements DisplayRequests {
         return result;
     }
 
+    //HELP COMMANDS
     private record HelpCommand(String command, String description) {
     }
 
@@ -110,7 +115,6 @@ public class ChessClient implements DisplayRequests {
             new HelpCommand("quit", "quit the client program"),
             new HelpCommand("help", "lists possible commands")
     );
-
     static final List<HelpCommand> observingCommands = List.of(
             new HelpCommand("legal", "moves for the current board"),
             new HelpCommand("redraw", "redraw the board"),
@@ -118,7 +122,6 @@ public class ChessClient implements DisplayRequests {
             new HelpCommand("quit", "quit the client program"),
             new HelpCommand("help", "lists possible commands")
     );
-
     static final List<HelpCommand> playingCommands = List.of(
             new HelpCommand("redraw", "redraw the board"),
             new HelpCommand("leave", "leave the current game"),
@@ -133,10 +136,9 @@ public class ChessClient implements DisplayRequests {
         List<HelpCommand> helpCommandList = switch (userState) {
             case LOGGED_IN -> loggedInCommands;
             case OBSERVER -> observingCommands;
-            case BLACK_PLAYER, WHITE_PLAYER -> playingCommands;
+            case BLACK, WHITE -> playingCommands;
             default -> loggedOutCommands;
         };
-
         StringBuilder sb = new StringBuilder();
         for (var me : helpCommandList) {
             sb.append(String.format("  %s%s%s - %s%s%s%n", SET_TEXT_COLOR_YELLOW, me.command, RESET_TEXT_COLOR, RESET_TEXT_COLOR, me.description, RESET_TEXT_COLOR));
@@ -178,7 +180,6 @@ public class ChessClient implements DisplayRequests {
 
     private String logout(String[] ignore) throws ResponseException {
         verifyAuth();
-
         if (userState != State.LOGGED_OUT) {
             server.logout(authToken);
             userState = State.LOGGED_OUT;
@@ -223,8 +224,10 @@ public class ChessClient implements DisplayRequests {
                 var gameID = Integer.parseInt(params[0]);
                 var color = ChessGame.TeamColor.valueOf(params[1].toUpperCase());
                 gameData = server.joinGame(authToken, gameID, color);
-                userState = (color == ChessGame.TeamColor.WHITE ? State.WHITE_PLAYER : BLACK_PLAYER);
-                printGameBothSides();
+                var joinCommand = new PlayerJoinCommand(authToken, gameID, color);
+                webSocket.sendCommand(joinCommand);
+                userState = (color == ChessGame.TeamColor.WHITE ? State.WHITE : BLACK);
+                printGame(color, null);
                 return String.format("Joined %d as %s", gameID, color);
             }
         }
@@ -237,6 +240,7 @@ public class ChessClient implements DisplayRequests {
             if (params.length == 1) {
                 var gameID = Integer.parseInt(params[0]);
                 gameData = server.observeGame(authToken, gameID);
+                webSocket.sendCommand(new GameCommand(UserGameCommand.CommandType.JOIN_OBSERVER, authToken, gameID));
                 userState = State.OBSERVER;
                 printGameBothSides();
                 return String.format("Joined %d as observer", gameID);
@@ -248,8 +252,14 @@ public class ChessClient implements DisplayRequests {
 
     private String redraw(String[] params) throws Exception {
         verifyAuth();
-        if (userState == BLACK_PLAYER || userState == State.WHITE_PLAYER || userState == State.OBSERVER) {
-            printGameBothSides();
+        if (userState == BLACK || userState == State.WHITE || userState == State.OBSERVER) {
+            ChessGame.TeamColor color;
+            if (userState.equals(BLACK)) {
+                color = ChessGame.TeamColor.BLACK;
+            } else {
+                color = ChessGame.TeamColor.WHITE;
+            }
+            printGame(color, null);
             return "";
         }
         return "Failure";
@@ -257,7 +267,7 @@ public class ChessClient implements DisplayRequests {
 
     private String legal(String[] params) throws Exception {
         verifyAuth();
-        if (userState == BLACK_PLAYER || userState == State.WHITE_PLAYER || userState == State.OBSERVER) {
+        if (userState == BLACK || userState == State.WHITE || userState == State.OBSERVER) {
             if (params.length == 1) {
                 var pos = new ChessPositionImpl(params[0]);
                 var highlights = new ArrayList<ChessPosition>();
@@ -265,7 +275,7 @@ public class ChessClient implements DisplayRequests {
                 for (var move : gameData.getGame().validMoves(pos)) {
                     highlights.add(move.getEndPosition());
                 }
-                var color = userState == BLACK_PLAYER ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+                var color = userState == BLACK ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
                 printGame(color, highlights);
                 return "";
             }
@@ -278,7 +288,8 @@ public class ChessClient implements DisplayRequests {
         if (params.length == 1) {
             var move = new ChessMoveImpl(params[0]);
             if (isMoveLegal(move)) {
-                //webSocket.sendCommand(new MoveCommand(authToken, gameData.getGameID(), move));
+                webSocket.sendCommand(new MoveCommand(authToken, gameData.getGameID(), move));
+
                 return "Success";
             }
         }
@@ -294,8 +305,9 @@ public class ChessClient implements DisplayRequests {
         return false;
     }
 
-    private String leave(String[] params) {
-        if (userState == State.WHITE_PLAYER || userState == BLACK_PLAYER || userState == State.OBSERVER) {
+    private String leave(String[] params) throws Exception {
+        if (userState == State.WHITE || userState == BLACK || userState == State.OBSERVER) {
+            webSocket.sendCommand(new GameCommand(UserGameCommand.CommandType.LEAVE, authToken, gameData.getGameID()));
             userState = State.LOGGED_IN;
             gameData = null;
             return "Left game";
@@ -303,12 +315,18 @@ public class ChessClient implements DisplayRequests {
         return "Failure";
     }
 
-    private String resign(String[] params) {
-        return "Method not implemented yet";
+    private String resign(String[] params) throws Exception {
+        if (userState == State.WHITE || userState == BLACK) {
+            webSocket.sendCommand(new GameCommand(GameCommand.CommandType.RESIGN, authToken, gameData.getGameID()));
+            userState = State.LOGGED_IN;
+            gameData = null;
+            return "Resigned";
+        }
+        return "Failure";
     }
 
     private void printGame() {
-        var color = userState == BLACK_PLAYER ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+        var color = userState == BLACK ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
         printGame(color, null);
     }
 
@@ -326,7 +344,7 @@ public class ChessClient implements DisplayRequests {
     }
 
     public boolean isPlayer() {
-        return (gameData != null && (userState == State.WHITE_PLAYER || userState == BLACK_PLAYER) && !isGameOver());
+        return (gameData != null && (userState == State.WHITE || userState == BLACK) && !isGameOver());
     }
 
 

@@ -28,8 +28,8 @@ public class ChessMoveImpl implements ChessMove {
             int colEnd = chessMoveString.charAt(2) - 'a' + 1;
             int rowEnd = chessMoveString.charAt(3) - '1' + 1;
 
-            this.startPosition = new ChessPositionImpl(rowStart, colStart);
-            this.endPosition = new ChessPositionImpl(rowEnd, colEnd);
+            this.startPosition = new ChessPositionImpl(colStart, rowStart);
+            this.endPosition = new ChessPositionImpl(colEnd, rowEnd);
             if (chessMoveString.length() == 5) {
                 promotionPiece = switch (chessMoveString.charAt(4)) {
                     case 'q' -> ChessPiece.PieceType.QUEEN;

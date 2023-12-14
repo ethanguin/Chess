@@ -174,6 +174,27 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
+    public void updateGame(int gameID, String chessGame, String whiteUsername, String blackUsername) throws DataAccessException {
+        if (findGame(gameID) == null) {
+            throw new DataAccessException("Error: bad request");
+        }
+        String sqlUpdate = "UPDATE games SET game = ?, whiteUsername = ?, blackUsername = ? WHERE gameID = ?";
+
+        var conn = chessDatabase.getConnection();
+        try (var preparedStatement = conn.prepareStatement(sqlUpdate)) {
+            preparedStatement.setString(1, chessGame);
+            preparedStatement.setString(2, whiteUsername);
+            preparedStatement.setString(3, blackUsername);
+            preparedStatement.setInt(4, gameID);
+            preparedStatement.execute();
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex.toString());
+        } finally {
+            chessDatabase.returnConnection(conn);
+        }
+    }
+
+    @Override
     public GameData findGame(int gameID) throws DataAccessException {
         String sqlInsert = "SELECT * FROM games WHERE gameID = ?";
         ResultSet resultSet;

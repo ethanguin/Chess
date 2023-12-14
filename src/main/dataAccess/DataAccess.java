@@ -73,6 +73,8 @@ public interface DataAccess {
      * @param chessGame - the new chessGame string
      * @throws DataAccessException - throws if user is unauthorized, if gameID doesn't exist, or if unable to access stored data
      */
+    void updateGame(int gameID, String chessGame, String whiteUsername, String blackUsername) throws DataAccessException;
+
     void updateGame(int gameID, String chessGame) throws DataAccessException;
 
     /**

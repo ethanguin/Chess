@@ -19,7 +19,7 @@ public class Main {
                 try {
                     result = client.execute(input);
                     System.out.print(RESET_TEXT_COLOR + result);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
             }
