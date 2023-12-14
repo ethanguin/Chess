@@ -206,7 +206,7 @@ public class WebSocketHandler {
         if (gameData != null) {
             if (connection.user.getUsername().equals(gameData.getBlackUsername())) {
                 gameData.setBlackUsername(null);
-            } else if (gameData.getWhiteUsername().equals(connection.user.getUsername())) {
+            } else if (connection.user.getUsername().equals(gameData.getWhiteUsername())) {
                 gameData.setWhiteUsername(null);
             }
             Gson gson = new Gson();
